@@ -7,35 +7,58 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import Icon from "@material-ui/core/Icon";
-// @material-ui/icons
-import Search from "@material-ui/icons/Search";
-import Email from "@material-ui/icons/Email";
-import Face from "@material-ui/icons/Face";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import Explore from "@material-ui/icons/Explore";
-// core components
-import GridContainer from "/components/Grid/GridContainer.js";
-import GridItem from "/components/Grid/GridItem.js";
-import Header from "/components/Header/Header.js";
-import CustomInput from "/components/CustomInput/CustomInput.js";
-import CustomDropdown from "/components/CustomDropdown/CustomDropdown.js";
+import { List, ListItem, Typography } from "@material-ui/core";
+
+import Link from "next/link";
+
 import Button from "/components/CustomButtons/Button.js";
 
-import styles from "/styles/jss/nextjs-material-kit/pages/componentsSections/navbarsStyle.js";
+import { authContext } from "/auth/Context";
+
+// import commonStyle from "/styles/jss/atrs/commonStyle.js";
+import headerLinksStyle from "/styles/jss/nextjs-material-kit/components/headerLinksStyle.js";
+
+// overwwrite commonStyle with headerLinksStyle (if key duplicates, headerLinksStyle will be used)
+const styles = headerLinksStyle;
 
 const useStyles = makeStyles(styles);
 
-export default function ATRSNavbar() {
+export default function ATRSHeaderLinks() {
 	const classes = useStyles();
-	const [user, setUser] = React.useState({
-		logintype: null,
-		username: null
-	});
+	const { user } = React.useContext(authContext);
 
 	return (
-		<div></div>
+		<List className={classes.list}>
+      <ListItem className={classes.listItem}>
+        {/* display username */}
+        {/* <Button
+          href={user.username ? "/profile" : "/login"}
+          className={classes.navLink}
+          onClick={(e) => e.preventDefault()}
+          color="transparent"
+        >
+          {user.username ? user.username : "Login/Register"}
+        </Button> */}
+        <Link href={user.username ? "/profile" : "/login"}>
+          <a className={classes.navLink}>
+            {user.username ? user.username : "Login/Register"}
+          </a>
+        </Link>
+      </ListItem>
+      { user.username ?
+      <ListItem className={classes.listItem}>
+        {/* display logout button */}
+        <Button
+          href="#pablo"
+          className={classes.navLink}
+          onClick={(e) => e.preventDefault()}
+          color="transparent"
+        >
+          Logout
+        </Button>
+      </ListItem>
+      : null
+      }
+    </List>
 	);
 }	

@@ -6,14 +6,13 @@ import Link from "next/link";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
+
 // core components
-import Header from "/components/Header/Header.js";
 // import HeaderLinks from "/components/Header/HeaderLinks.js";
 import Footer from "/components/Footer/Footer.js";
 import GridContainer from "/components/Grid/GridContainer.js";
 import GridItem from "/components/Grid/GridItem.js";
 import Button from "/components/CustomButtons/Button.js";
-import Parallax from "/components/Parallax/Parallax.js";
 // sections for this page
 import SectionBasics from "/pages-sections/Components-Sections/SectionBasics.js";
 import SectionNavbars from "/pages-sections/Components-Sections/SectionNavbars.js";
@@ -29,54 +28,19 @@ import SectionExamples from "/pages-sections/Components-Sections/SectionExamples
 import SectionDownload from "/pages-sections/Components-Sections/SectionDownload.js";
 
 import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
-import headerLinksStyle from "/styles/jss/nextjs-material-kit/components/headerLinksStyle.js";
 
-import { authContext } from "/auth/Context";
-import { List, ListItem } from "@material-ui/core";
-import SectionTest from "/atrs-sections/Index-Sections/SectionTest";
+import ATRSHeader from "../atrs-components/Header/ATRSHeader";
+
+import SectionTest from "/atrs-sections/Test-Sections/SectionTest";
 
 const useStyles = makeStyles(styles);
-const useHeaderLinksStyles = makeStyles(headerLinksStyle);
 
 export default function Components(props) {
   const classes = useStyles();
-  const classesHeaderLinks = useHeaderLinksStyles();
   const { ...rest } = props;
-  const { user } = React.useContext(authContext);
   return (
     <div>
-      <Header
-        brand="FlyFinder"
-        rightLinks={
-          <List className={classesHeaderLinks.list}>
-            <ListItem className={classesHeaderLinks.listItem}>
-              {/* display username */}
-              <Button
-                href="#pablo"
-                className={classes.navLink}
-                onClick={(e) => e.preventDefault()}
-                color="transparent"
-              >
-                {user.username ? user.username : "Login/Register"}
-              </Button>
-            </ListItem>
-            <ListItem className={classesHeaderLinks.listItem}>
-              {/* display logout button */}
-              <Button
-                href="#pablo"
-                className={classes.navLink}
-                onClick={(e) => e.preventDefault()}
-                color="transparent"
-              >
-                Logout
-              </Button>
-            </ListItem>
-          </List>
-        }
-        fixed
-        color="primary"
-        {...rest}
-      />
+      <ATRSHeader {...rest} />
      
       <div className={classNames(classes.main)}>
         <SectionTest />

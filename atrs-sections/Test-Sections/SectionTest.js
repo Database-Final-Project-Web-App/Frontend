@@ -6,7 +6,7 @@ import Button from "/components/CustomButtons/Button.js";
 import GridContainer from "/components/Grid/GridContainer.js";
 import GridItem from "/components/Grid/GridItem.js";
 
-import styles from "/styles/jss/atrs/common.js"
+import styles from "/styles/jss/atrs/commonStyle.js"
 
 import { authContext } from "../../auth/Context";
 import * as CONSTANTS from "../../utils/constants"
@@ -37,7 +37,7 @@ export default function SectionTest() {
 				<GridContainer justify="center">
 						<GridItem xs={12} sm={12} md={8}>
 							{CONSTANTS.LOGINTYPE.map((logintype) => (
-									<Button color="primary" onClick={() => setUser({logintype: logintype, username: logintype})}>
+									<Button color="primary" onClick={() => setUser({logintype: logintype, username: logintype})} key={logintype}>
 										{logintype ? logintype : "null"}
 									</Button>
 							))}

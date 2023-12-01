@@ -19,6 +19,8 @@ import CardHeader from "/components/Card/CardHeader.js";
 import CardFooter from "/components/Card/CardFooter.js";
 import CustomInput from "/components/CustomInput/CustomInput.js";
 
+import ATRSHeader from "../atrs-components/Header/ATRSHeader";
+
 import styles from "/styles/jss/nextjs-material-kit/pages/loginPage.js";
 
 const useStyles = makeStyles(styles);
@@ -32,13 +34,14 @@ export default function LoginPage(props) {
   const { ...rest } = props;
   return (
     <div>
-      <Header
+      {/* <Header
         absolute
         color="transparent"
         brand="NextJS Material Kit"
         rightLinks={<HeaderLinks />}
         {...rest}
-      />
+      /> */}
+      <ATRSHeader {...rest} />
       <div
         className={classes.pageHeader}
         style={{
