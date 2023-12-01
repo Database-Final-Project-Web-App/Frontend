@@ -33,6 +33,7 @@ import headerLinksStyle from "/styles/jss/nextjs-material-kit/components/headerL
 
 import { authContext } from "/auth/Context";
 import { List, ListItem } from "@material-ui/core";
+import SectionTest from "/atrs-sections/Index-Sections/SectionTest";
 
 const useStyles = makeStyles(styles);
 const useHeaderLinksStyles = makeStyles(headerLinksStyle);
@@ -77,23 +78,8 @@ export default function Components(props) {
         {...rest}
       />
      
-      {/* <Parallax image="/img/nextjs_header.jpg">
-        <div className={classes.container}>
-          <GridContainer>
-            <GridItem>
-              <div className={classes.brand}>
-                <h1 className={classes.title}>NextJS Material Kit.</h1>
-                <h3 className={classes.subtitle}>
-                  A Badass Material Kit based on Material-UI and NextJS.
-                </h3>
-              </div>
-            </GridItem>
-          </GridContainer>
-        </div>
-      </Parallax> */}
-
-      {/* <div className={classNames(classes.main, classes.mainRaised)}> */}
       <div className={classNames(classes.main)}>
+        <SectionTest />
         <SectionBasics />
         <SectionNavbars />
         <SectionTabs />

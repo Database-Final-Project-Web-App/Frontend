@@ -1,5 +1,13 @@
 import React from "react";
 
+
+/* 
+	create a state for the user login status. The format is
+	{
+		"logintype": null | "customer" | "booking-agent" | "airline-staff"
+		"username": null | "username"
+	}
+*/
 export const authContext  = React.createContext({
 	logintype: null,
 	username: null,

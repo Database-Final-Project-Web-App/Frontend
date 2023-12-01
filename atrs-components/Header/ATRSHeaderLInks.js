@@ -30,13 +30,6 @@ const useStyles = makeStyles(styles);
 
 export default function ATRSNavbar() {
 	const classes = useStyles();
-	/* 
-		create a state for the user login status. The format is
-		{
-			"logintype": null | "customer" | "booking-agent" | "airline-staff"
-			"username": null | "username"
-		}
-	*/
 	const [user, setUser] = React.useState({
 		logintype: null,
 		username: null
