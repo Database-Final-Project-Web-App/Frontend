@@ -20,6 +20,8 @@ import App from "next/app";
 import Head from "next/head";
 import "/styles/scss/nextjs-material-kit.scss?v=1.2.0";
 
+import { AuthProvider } from "../auth/Context";
+
 export default class MyApp extends App {
   componentDidMount() {
     let comment = document.createComment(`
@@ -54,16 +56,20 @@ export default class MyApp extends App {
     const { Component, pageProps } = this.props;
 
     return (
+    
+    // wrap the app in the AuthProvider to share the user state between pages
+    <AuthProvider>
       <React.Fragment>
         <Head>
           <meta
             name="viewport"
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
           />
-          <title>NextJS Material Kit by Creative Tim</title>
+          <title>FlyFinder - Book Your Flight Today!</title>
         </Head>
         <Component {...pageProps} />
       </React.Fragment>
+    </AuthProvider>
     );
   }
 }
