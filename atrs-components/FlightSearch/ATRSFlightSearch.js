@@ -1,23 +1,51 @@
 import React, { useState } from 'react';
 import {
-  Container,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Grid
+  Container, Card, CardContent, Typography, Grid, Button, TextField
 } from '@material-ui/core';
+
+// Utility function to render input fields
+const renderSearchField = (fieldConfig, handleInputChange) => (
+  <Grid item xs={12} sm={6} md={3} key={fieldConfig.name}>
+    <TextField
+      fullWidth
+      name={fieldConfig.name}
+      label={fieldConfig.label}
+      onChange={handleInputChange}
+      variant="outlined"
+      margin="normal"
+      type={fieldConfig.type || "text"} // Default type is text
+    />
+  </Grid>
+);
+
+
 
 const ATRSFlightSearch = () => {
   const [searchParams, setSearchParams] = useState({});
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const fieldsConfig = [
+    { name: 'flight_num', label: 'Flight Number', type: 'number' },
+    { name: 'airline_name', label: 'Airline Name' },
+    // Add more fields here as per your search_handler
+  ];
+
+  const convertToFieldType = (name, value) => {
+    const field = fieldsConfig.find(f => f.name === name);
+    if (field && field.type === 'number') {
+      return Number(value);
+    }
+    return value; // Default case, return the value as-is
+  };
+
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    const updatedValue = convertToFieldType(name, value);
+
     setSearchParams({
       ...searchParams,
-      [e.target.name]: e.target.value
+      [name]: updatedValue
     });
   };
 
@@ -46,35 +74,25 @@ const ATRSFlightSearch = () => {
     } finally {
       setLoading(false);
     }
+
   };
 
   return (
     <Container>
       <form onSubmit={handleSubmit}>
-        {/* Add input fields for each search parameter */}
-        {/* Example: */}
-        <TextField name="flight_num" label="Flight Number" onChange={handleInputChange} />
-        {/* Repeat for other parameters */}
-        <Button type="submit" color="primary" variant="contained">Search Flights</Button>
+        <Grid container spacing={2}>
+          {fieldsConfig.map(field => 
+            renderSearchField(field, handleInputChange)
+          )}
+          <Grid item xs={12}>
+            <Button type="submit" color="primary" variant="contained">
+              Search Flights
+            </Button>
+          </Grid>
+        </Grid>
       </form>
 
-      {loading ? <p>Loading...</p> : (
-        <Grid container spacing={2}>
-          {flights.map(flight => (
-            <Grid item key={flight.flight_num} xs={12} sm={6} md={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h5">{flight.airline_name}</Typography>
-                  {/* Display other flight details */}
-                  <Typography variant="body2">Departure: {flight.dept_city}</Typography>
-                  <Typography variant="body2">Arrival: {flight.arr_city}</Typography>
-                  {/* Add link to detailed flight page */}
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      )}
+      {/* Flight cards rendering... */}
     </Container>
   );
 };
