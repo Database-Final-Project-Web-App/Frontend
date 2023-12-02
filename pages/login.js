@@ -16,90 +16,51 @@ import CustomTabs from '/components/CustomTabs/CustomTabs.js';
 import ATRSHeader from '../atrs-components/Header/ATRSHeader';
 import ATRSFooter from '../atrs-components/Footer/ATRSFooter';
 import styles from '/styles/jss/nextjs-material-kit/pages/components.js';
+import { renderInputField } from '/utils/utils.js';
 
 styles.section = {
 	padding: '140px 0 70px 0',
 }
 
-styles.datetimeField = {
-	paddingTop: '27px',
-	marginBottom: '17px',
-}
-
 const useStyles = makeStyles(styles);
 
 
-function RegisterForm({ logintype, additionalFields, onSubmit }) {
-
-	const classes = useStyles();
-
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [fields, setFields] = useState(additionalFields.reduce((acc, field) => {
-    acc[field] = '';
+function RegisterForm({ logintype, fieldsConfig, onSubmit }) {
+  const [formData, setFormData] = useState(fieldsConfig.reduce((acc, field) => {
+    acc[field.name] = '';
     return acc;
   }, {}));
+  const classes = useStyles();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ username, password, logintype, ...fields });
-  };
-
-  const handleFieldChange = (fieldName) => (e) => {
-    setFields(prevFields => ({ ...prevFields, [fieldName]: e.target.value }));
+    onSubmit({ ...formData, logintype });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <CustomInput
-        labelText="Username"
-        id="username"
-        formControlProps={{
-          fullWidth: true
-        }}
-        inputProps={{
-          type: "text",
-          onChange: (e) => setUsername(e.target.value)
-        }}
-      />
-      <CustomInput
-        labelText="Password"
-        id="password"
-        formControlProps={{
-          fullWidth: true
-        }}
-        inputProps={{
-          type: "password",
-          onChange: (e) => setPassword(e.target.value)
-        }}
-      />
-			<Datetime
-				inputProps={{ placeholder: "Date of Birth" }}
-				onChange={handleFieldChange('date_of_birth')}
-				className={classes.datetimeField}
-				timeFormat={false}
-			/>
-      {additionalFields.map(field => (
-        <CustomInput
-          key={field}
-          labelText={field.charAt(0).toUpperCase() + field.slice(1)}
-          id={field}
-          formControlProps={{
-            fullWidth: true
-          }}
-          inputProps={{
-            type: "text",
-            onChange: handleFieldChange(field)
-          }}
-        />
-      ))}
+      {fieldsConfig.map(field => renderInputField(field))}
       <Button color="primary" type="submit">Register</Button>
     </form>
   );
 }
 
+
 function CustomerRegisterPill() {
-  const additionalFields = ['name', 'building_number', 'street', 'city', 'state', 'phone_number', 'passport_number', 'passport_expiration', 'passport_country', 'date_of_birth'];
+  const fieldsConfig = [
+    { name: 'username', label: 'Username' },
+    { name: 'password', label: 'Password', type: 'password' },
+    { name: 'name', label: 'Name' },
+    { name: 'building_number', label: 'Building Number' },
+    { name: 'street', label: 'Street' },
+    { name: 'city', label: 'City' },
+    { name: 'state', label: 'State' },
+    { name: 'phone_number', label: 'Phone Number' },
+    { name: 'passport_number', label: 'Passport Number' },
+    { name: 'passport_expiration', label: 'Passport Expiration', type: 'date' },
+    { name: 'passport_country', label: 'Passport Country' },
+    { name: 'date_of_birth', label: 'Date of Birth', type: 'date' }
+  ];
 
   const handleSubmit = (data) => {
     console.log('Customer Register Data:', data);
@@ -107,12 +68,17 @@ function CustomerRegisterPill() {
   };
 
   return (
-    <RegisterForm logintype="customer" additionalFields={additionalFields} onSubmit={handleSubmit} />
+    <RegisterForm logintype="customer" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
   );
 }
 
 function AgentRegisterPill() {
-  const additionalFields = ['booking_agent_id', 'airline_name'];
+  const fieldsConfig = [
+    { name: 'username', label: 'Username' },
+    { name: 'password', label: 'Password', type: 'password' },
+    { name: 'booking_agent_id', label: 'Booking Agent ID' },
+    { name: 'airline_name', label: 'Airline Name' }
+  ];
 
   const handleSubmit = (data) => {
     console.log('Agent Register Data:', data);
@@ -120,12 +86,20 @@ function AgentRegisterPill() {
   };
 
   return (
-    <RegisterForm logintype="booking_agent" additionalFields={additionalFields} onSubmit={handleSubmit} />
+    <RegisterForm logintype="booking agent" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
   );
 }
 
 function StaffRegisterPill() {
-  const additionalFields = ['first_name', 'last_name', 'date_of_birth', 'permission', 'airline_name'];
+  const fieldsConfig = [
+    { name: 'username', label: 'Username' },
+    { name: 'password', label: 'Password', type: 'password' },
+    { name: 'first_name', label: 'First Name' },
+    { name: 'last_name', label: 'Last Name' },
+    { name: 'date_of_birth', label: 'Date of Birth', type: 'date' },
+    { name: 'permission', label: 'Permission' },
+    { name: 'airline_name', label: 'Airline Name' }
+  ];
 
   const handleSubmit = (data) => {
     console.log('Staff Register Data:', data);
@@ -133,14 +107,15 @@ function StaffRegisterPill() {
   };
 
   return (
-    <RegisterForm logintype="airline_staff" additionalFields={additionalFields} onSubmit={handleSubmit} />
+    <RegisterForm logintype="staff" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
   );
 }
+
 
 function RegisterTab() {
 	return (
 	<div>
-		<Typography variant="h4">Register as a...</Typography>
+		<Typography variant="h4">Register as...</Typography>
 		<NavPills 
 			color="rose"
 			tabs={[
@@ -388,7 +363,7 @@ function StaffLoginPill() {
 function LoginTab() {
 	return (
 		<div>
-			<Typography variant="h4">Login as a...</Typography>
+			<Typography variant="h4">Login as...</Typography>
 			<NavPills 
 				color="rose"
 				tabs={[
