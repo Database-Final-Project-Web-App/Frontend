@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Container, Card, CardContent, Typography, Grid, Button, TextField
+  Container, Card, CardContent, Typography, Grid, Button, TextField, InputLabel
 } from '@material-ui/core';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
@@ -15,17 +15,13 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
     switch (fieldConfig.inputType) {
       case 'datetime':
         return (
+					<div>
+					<Typography variant="caption">{fieldConfig.label}</Typography>
           <Datetime
             onChange={momentObj => handleInputChange({ target: { name: fieldConfig.name, value: momentObj } })}
             inputProps={{ placeholder: fieldConfig.label }}
           />
-        );
-      case 'slider':
-        return (
-          <Slider
-            onChange={(event, value) => handleInputChange({ target: { name: fieldConfig.name, value } })}
-            aria-labelledby="input-slider"
-          />
+					</div>
         );
       // Add cases for 'doubleSlider' and other types if needed
       default:
@@ -53,7 +49,7 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
 
 // FlightCard component
 const FlightSummaryCard = ({ flight }) => (
-  <Grid item xs={12} sm={6} md={4}>
+  <Grid item xs={12} sm={12} md={12}>
     <Card>
       <CardContent>
         <Typography variant="h5">{flight.airline_name}</Typography>
@@ -68,7 +64,7 @@ const FlightSummaryCard = ({ flight }) => (
 );
 
 const FlightFullCard = ({ flight }) => (
-	<Grid item xs={12} sm={6} md={4}>
+	<Grid item xs={12} sm={12} md={12}>
 		<Card>
 			<CardContent>
 				<Typography variant="h5">{flight.airline_name}</Typography>
@@ -83,6 +79,28 @@ const FlightFullCard = ({ flight }) => (
 	</Grid>
 );
 
+const convertToFieldType = (name, value, fieldsConfig) => {
+	const field = fieldsConfig.find(f => f.name === name);
+	if (value === '') {
+		return null;
+	}
+	if (!field) {
+		return value;
+	}
+	switch (field.type) {
+		case 'number':
+			return value !== '' ? Number(value) : null;
+		case 'date':
+			return value.format ? value.format('YYYY-MM-DD') : null;
+		case 'time':
+			return value.format ? value.format('HH:mm:ss') : null;
+		case 'datetime':
+			return value.format ? value.format('YYYY-MM-DD HH:mm:ss') : null;
+		default:
+			return value;		// Default case, return the value as-is		
+	}
+};
+
 // search by flight_num and airline_name to locate a specific flight
 export const ATRSFlightCheck = () => {
   const [searchParams, setSearchParams] = useState({});
@@ -95,17 +113,9 @@ export const ATRSFlightCheck = () => {
     // Add more fields here as per your search_handler
   ];
 
-  const convertToFieldType = (name, value) => {
-    const field = fieldsConfig.find(f => f.name === name);
-    if (field && field.type === 'number') {
-			return value != '' ? Number(value) : null;
-    }
-    return value; // Default case, return the value as-is
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const updatedValue = convertToFieldType(name, value);
+    const updatedValue = convertToFieldType(name, value, fieldsConfig);
 
     setSearchParams({
       ...searchParams,
@@ -116,6 +126,8 @@ export const ATRSFlightCheck = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 		// 1. validate fields
+		console.log(`searchParams: ${JSON.stringify(searchParams)}`)
+		console.log("1. validate fields")
 		const { flag, message } = validateFields(fieldsConfig, searchParams);
 		if (!flag) {
 			alert(message);
@@ -182,30 +194,21 @@ export const ATRSFlightSearch = () => {
   const [loading, setLoading] = useState(false);
 
   const fieldsConfig = [
-    { name: 'airline_name', label: 'Airline Name' },
-    { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
     { name: 'departure_time', label: 'Departure Time', type: 'datetime', inputType: 'datetime' },
-    { name: 'price', label: 'Price', type: 'number' },
+    { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
+    { name: 'airline_name', label: 'Airline Name' },
     { name: 'status', label: 'Status' },
-    { name: 'arr_airport_name', label: 'Arrival Airport' },
     { name: 'dept_airport_name', label: 'Departure Airport' },
-    { name: 'arr_city', label: 'Arrival City' },
     { name: 'dept_city', label: 'Departure City' },
+    { name: 'arr_airport_name', label: 'Arrival Airport' },
+    { name: 'arr_city', label: 'Arrival City' },
+    { name: 'price', label: 'Price', type: 'number' },
     // Add more fields as required
   ];
 
-  const convertToFieldType = (name, value) => {
-    const field = fieldsConfig.find(f => f.name === name);
-    if (field && field.type === 'number') {
-      return value !== '' ? Number(value) : null;
-    }
-    return value; // Default case, return the value as-is
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const updatedValue = convertToFieldType(name, value);
-
+    const updatedValue = convertToFieldType(name, value, fieldsConfig);
     setSearchParams({
       ...searchParams,
       [name]: updatedValue
@@ -216,7 +219,17 @@ export const ATRSFlightSearch = () => {
     e.preventDefault();
     setLoading(true);
 
+		// 1. validate fields
+		console.log(`searchParams: ${JSON.stringify(searchParams)}`);
+		console.log("1. validate fields");
+		const { flag, message } = validateFields(fieldsConfig, searchParams);
+		if (!flag) {
+			alert(message);
+			return;
+		}
+
     try {
+			console.log(searchParams)
       const response = await fetch('http://localhost:5000/api/public/flight/search', {
         method: 'POST',
         headers: {

@@ -54,6 +54,26 @@ function handleFieldChange(setFormData, fieldName, fieldType) {
 }
 
 export function validateFields(fieldsConfig, data) {
+  // 0. pop fieldsConfig's items with key that is not in data
+  console.log(`fieldsConfig before pop: ${JSON.stringify(fieldsConfig)}`)
+  for (const field of fieldsConfig) {
+    if (!(field.name in data)) {
+      fieldsConfig.pop(field);
+      console.log(`pop ${field.name} from fieldsConfig`);
+    }
+  }
+  console.log(`fieldsConfig after pop: ${JSON.stringify(fieldsConfig)}`)
+
+  // 0. pop items with value of an empty string
+  console.log(`fieldsConfig before pop: ${JSON.stringify(fieldsConfig)}`)
+  for (const field of fieldsConfig) {
+    if (data[field.name] === '') {
+      fieldsConfig.pop(field);
+      console.log(`pop ${field.name} from fieldsConfig`);
+    }
+  }
+  console.log(`fieldsConfig after pop: ${JSON.stringify(fieldsConfig)}`)
+  
   // 1. if required but not filled in, alert user and return false
   for (const field of fieldsConfig) {
 		if (field.required && (data[field.name] === undefined || data[field.name] === '')) {
@@ -64,9 +84,9 @@ export function validateFields(fieldsConfig, data) {
   // 2. if date/time/datetime format is invalid, alert user and return false
   //    This can be simplified because date/time/datetime fields are all moment objects
   for (const field of fieldsConfig) {
-    // if (!(field.type === 'date' || field.type === 'time' || field.type === 'datetime')) {
-    //   continue;
-    // }
+    if (data[field.name] === undefined || data[field.name] === null) {
+      continue;
+    }
     switch (field.type) {
       case 'date':
         // use Datetime to match YYYY-MM-DD
@@ -81,8 +101,10 @@ export function validateFields(fieldsConfig, data) {
         }
         break;
       case 'datetime':
+        // debugger
         // use Datetime to match YYYY-MM-DD HH:mm:ss
         if (!Datetime.moment(data[field.name], 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
+          console.log(`Invalid datetime format for ${field.label}: ${data[field.name]}`)
           return { flag: false, message: `Invalid datetime format for ${field.label}` };
         }
         break;
