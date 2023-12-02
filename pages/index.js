@@ -30,6 +30,7 @@ import SectionDownload from "/pages-sections/Components-Sections/SectionDownload
 import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
 
 import ATRSHeader from "../atrs-components/Header/ATRSHeader";
+import ATRSFooter from "../atrs-components/Footer/ATRSFooter";
 
 import SectionTest from "/atrs-sections/Test-Sections/SectionTest";
 
@@ -66,7 +67,7 @@ export default function Components(props) {
         <SectionExamples />
         <SectionDownload />
       </div>
-      <Footer />
+      <ATRSFooter />
     </div>
   );
 }

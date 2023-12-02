@@ -34,13 +34,6 @@ export default function LoginPage(props) {
   const { ...rest } = props;
   return (
     <div>
-      {/* <Header
-        absolute
-        color="transparent"
-        brand="NextJS Material Kit"
-        rightLinks={<HeaderLinks />}
-        {...rest}
-      /> */}
       <ATRSHeader {...rest} />
       <div
         className={classes.pageHeader}
