@@ -54,25 +54,6 @@ function handleFieldChange(setFormData, fieldName, fieldType) {
 }
 
 export function validateFields(fieldsConfig, data) {
-  // 0. pop fieldsConfig's items with key that is not in data
-  console.log(`fieldsConfig before pop: ${JSON.stringify(fieldsConfig)}`)
-  for (const field of fieldsConfig) {
-    if (!(field.name in data)) {
-      fieldsConfig.pop(field);
-      console.log(`pop ${field.name} from fieldsConfig`);
-    }
-  }
-  console.log(`fieldsConfig after pop: ${JSON.stringify(fieldsConfig)}`)
-
-  // 0. pop items with value of an empty string
-  console.log(`fieldsConfig before pop: ${JSON.stringify(fieldsConfig)}`)
-  for (const field of fieldsConfig) {
-    if (data[field.name] === '') {
-      fieldsConfig.pop(field);
-      console.log(`pop ${field.name} from fieldsConfig`);
-    }
-  }
-  console.log(`fieldsConfig after pop: ${JSON.stringify(fieldsConfig)}`)
   
   // 1. if required but not filled in, alert user and return false
   for (const field of fieldsConfig) {

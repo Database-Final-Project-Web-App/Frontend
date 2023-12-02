@@ -6,7 +6,7 @@ import ATRSFooter from "/atrs-components/Footer/ATRSFooter";
 
 import styles from '/styles/jss/nextjs-material-kit/pages/components.js';
 import { Typography } from '@material-ui/core';
-import { ATRSFlightCheck, ATRSFlightSearch } from '../atrs-components/FlightSearch/ATRSFlightSearch';
+import { ATRSFlightCheck, ATRSFlightSearch } from '/atrs-components/FlightSearch/ATRSFlightSearch';
 
 styles.section = {
 	padding: '140px 0 70px 0',

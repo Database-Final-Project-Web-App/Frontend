@@ -13,6 +13,8 @@ import { validateFields } from '/utils/utils';
 const renderSearchField = (fieldConfig, handleInputChange) => {
   const renderInputBasedOnType = () => {
     switch (fieldConfig.inputType) {
+      case 'date':
+      case 'time':
       case 'datetime':
         return (
 					<div>
@@ -20,6 +22,8 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
           <Datetime
             onChange={momentObj => handleInputChange({ target: { name: fieldConfig.name, value: momentObj } })}
             inputProps={{ placeholder: fieldConfig.label }}
+            dateFormat={fieldConfig.type === 'date' || fieldConfig.inputType === 'datetime'}
+            timeFormat={fieldConfig.type === 'time' || fieldConfig.inputType === 'datetime'}
           />
 					</div>
         );
@@ -135,6 +139,7 @@ export const ATRSFlightCheck = () => {
 		}
 
 		// 2. send post request to backend
+    console.log("2. send post request to backend")
     setLoading(true);
 
     try {
@@ -194,8 +199,10 @@ export const ATRSFlightSearch = () => {
   const [loading, setLoading] = useState(false);
 
   const fieldsConfig = [
-    { name: 'departure_time', label: 'Departure Time', type: 'datetime', inputType: 'datetime' },
-    { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
+    // { name: 'departure_time', label: 'Departure Time', type: 'datetime', inputType: 'datetime' },
+    // { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
+    { name: 'departure_date', label: 'Departure Date', type: 'date', inputType: 'date' },
+    { name: 'arrival_date', label: 'Arrival Date', type: 'date', inputType: 'date' },
     { name: 'airline_name', label: 'Airline Name' },
     { name: 'status', label: 'Status' },
     { name: 'dept_airport_name', label: 'Departure Airport' },
@@ -228,6 +235,23 @@ export const ATRSFlightSearch = () => {
 			return;
 		}
 
+    // 1.5 DIY part of searchParams
+    // add a field departure_time to searchParams. This should spans the entire departure_date
+    console.log("1.5 DIY part of searchParams")
+    if (searchParams.departure_date) {
+      // need to explicilty convert to moment object b/c departure_date is just a string
+      const startOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).startOf('day');
+      const endOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).endOf('day');
+      searchParams.departure_time = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
+    }
+    if (searchParams.arrival_date) {
+      const startOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).startOf('day');
+      const endOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).endOf('day');
+      searchParams.arrival_time = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
+    }
+    console.log(`searchParams: ${JSON.stringify(searchParams)}`)
+
+    // 2. send post request to backend
     try {
 			console.log(searchParams)
       const response = await fetch('http://localhost:5000/api/public/flight/search', {
