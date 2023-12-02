@@ -5,6 +5,9 @@
 */
 
 import React from "react";
+import Cookies from 'js-cookie';
+import Router from "next/router";
+
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import { List, ListItem, Typography } from "@material-ui/core";
@@ -23,6 +26,41 @@ const styles = headerLinksStyle;
 
 const useStyles = makeStyles(styles);
 
+
+function LogoutButton() {
+
+  const classes = useStyles();
+  const { user, updateUser } = React.useContext(authContext);
+
+  async function handleLogout() {
+    // clear the copy of user info on client side
+    //    otherwise, it could be invalid after logout
+    await fetch('http://localhost:5000/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch((error) => {
+      alert(error);
+      return null;
+    });
+
+    updateUser(null);
+
+    Router.push("/");
+  }
+
+  return (
+    <Button
+      href="#pablo"
+      className={classes.navLink}
+      onClick={handleLogout}
+      color="transparent"
+    >
+      Logout
+    </Button>
+    
+  )
+}
+
 export default function ATRSHeaderLinks() {
 	const classes = useStyles();
 	const { user } = React.useContext(authContext);
@@ -30,34 +68,19 @@ export default function ATRSHeaderLinks() {
 	return (
 		<List className={classes.list}>
       <ListItem className={classes.listItem}>
-        {/* display username */}
-        {/* <Button
-          href={user.username ? "/profile" : "/login"}
-          className={classes.navLink}
-          onClick={(e) => e.preventDefault()}
-          color="transparent"
-        >
-          {user.username ? user.username : "Login/Register"}
-        </Button> */}
-        <Link href={user.username ? "/profile" : "/login"}>
+        <Link href={user && user.username ? "/profile" : "/login"}>
           <a className={classes.navLink}>
-            {user.username ? user.username : "Login/Register"}
+            {user && user.username ? user.username_display : "Login/Register"}
           </a>
         </Link>
       </ListItem>
-      { user.username ?
-      <ListItem className={classes.listItem}>
-        {/* display logout button */}
-        <Button
-          href="#pablo"
-          className={classes.navLink}
-          onClick={(e) => e.preventDefault()}
-          color="transparent"
-        >
-          Logout
-        </Button>
-      </ListItem>
-      : null
+      { user && user.username
+        ?
+        <ListItem className={classes.listItem}>
+          <LogoutButton />
+        </ListItem>
+        : 
+        null
       }
     </List>
 	);

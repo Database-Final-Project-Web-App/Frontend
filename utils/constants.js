@@ -1,3 +1,3 @@
 export const LOGINTYPE = [
-	null, "customer", "booking-agent", "airline-staff"
+	null, "customer", "booking-agent", "airline-staffffff"
 ]
