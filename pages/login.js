@@ -1,49 +1,165 @@
-import React from "react";
-import classNames from "classnames";
+import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/router';
+import Datetime from 'react-datetime';
+import { makeStyles } from '@material-ui/core/styles';
+import GridContainer from '/components/Grid/GridContainer.js';
+import GridItem from '/components/Grid/GridItem.js';
+import Card from '/components/Card/Card.js';
+import CardHeader from '/components/Card/CardHeader.js';
+import CardBody from '/components/Card/CardBody.js';
+import CustomInput from '/components/CustomInput/CustomInput.js';
+import Button from '/components/CustomButtons/Button.js';
+import { authContext } from '/auth/Context.js';
+import { Typography } from '@material-ui/core';
+import NavPills from '/components/NavPills/NavPills.js';
+import CustomTabs from '/components/CustomTabs/CustomTabs.js';
+import ATRSHeader from '../atrs-components/Header/ATRSHeader';
+import ATRSFooter from '../atrs-components/Footer/ATRSFooter';
+import styles from '/styles/jss/nextjs-material-kit/pages/components.js';
 
-// @material-ui/core components
-import { makeStyles } from "@material-ui/core/styles";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import Icon from "@material-ui/core/Icon";
+styles.section = {
+	padding: '140px 0 70px 0',
+}
 
-// @material-ui/icons
-import People from "@material-ui/icons/People";
-import FaceIcon from '@material-ui/icons/Face';
-import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
-import BuildIcon from '@material-ui/icons/Build';
-
-// import SupportAgentIcon from '@material-ui/icons/SupportAgent';
-// import EngineeringIcon from '@material-ui/icons/Engineering';
-
-import { useRouter } from "next/router";
-
-// core components
-import Header from "/components/Header/Header.js";
-import HeaderLinks from "/components/Header/HeaderLinks.js";
-import GridContainer from "/components/Grid/GridContainer.js";
-import GridItem from "/components/Grid/GridItem.js";
-import Button from "/components/CustomButtons/Button.js";
-import Card from "/components/Card/Card.js";
-import CardBody from "/components/Card/CardBody.js";
-import CardHeader from "/components/Card/CardHeader.js";
-import CardFooter from "/components/Card/CardFooter.js";
-import CustomInput from "/components/CustomInput/CustomInput.js";
-import NavPills from "/components/NavPills/NavPills.js";
-import CustomTabs from "/components/CustomTabs/CustomTabs.js";
-
-import ATRSHeader from "../atrs-components/Header/ATRSHeader";
-import ATRSFooter from "../atrs-components/Footer/ATRSFooter";
-
-
-import { authContext } from "/auth/Context.js";
-
-import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
-import { Grid, Typography } from "@material-ui/core";
+styles.datetimeField = {
+	paddingTop: '27px',
+	marginBottom: '17px',
+}
 
 const useStyles = makeStyles(styles);
 
-styles.section = {
-	padding: "140px 0 70px 0",
+
+function RegisterForm({ logintype, additionalFields, onSubmit }) {
+
+	const classes = useStyles();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [fields, setFields] = useState(additionalFields.reduce((acc, field) => {
+    acc[field] = '';
+    return acc;
+  }, {}));
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({ username, password, logintype, ...fields });
+  };
+
+  const handleFieldChange = (fieldName) => (e) => {
+    setFields(prevFields => ({ ...prevFields, [fieldName]: e.target.value }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <CustomInput
+        labelText="Username"
+        id="username"
+        formControlProps={{
+          fullWidth: true
+        }}
+        inputProps={{
+          type: "text",
+          onChange: (e) => setUsername(e.target.value)
+        }}
+      />
+      <CustomInput
+        labelText="Password"
+        id="password"
+        formControlProps={{
+          fullWidth: true
+        }}
+        inputProps={{
+          type: "password",
+          onChange: (e) => setPassword(e.target.value)
+        }}
+      />
+			<Datetime
+				inputProps={{ placeholder: "Date of Birth" }}
+				onChange={handleFieldChange('date_of_birth')}
+				className={classes.datetimeField}
+				timeFormat={false}
+			/>
+      {additionalFields.map(field => (
+        <CustomInput
+          key={field}
+          labelText={field.charAt(0).toUpperCase() + field.slice(1)}
+          id={field}
+          formControlProps={{
+            fullWidth: true
+          }}
+          inputProps={{
+            type: "text",
+            onChange: handleFieldChange(field)
+          }}
+        />
+      ))}
+      <Button color="primary" type="submit">Register</Button>
+    </form>
+  );
+}
+
+function CustomerRegisterPill() {
+  const additionalFields = ['name', 'building_number', 'street', 'city', 'state', 'phone_number', 'passport_number', 'passport_expiration', 'passport_country', 'date_of_birth'];
+
+  const handleSubmit = (data) => {
+    console.log('Customer Register Data:', data);
+    // Implement POST request to backend here
+  };
+
+  return (
+    <RegisterForm logintype="customer" additionalFields={additionalFields} onSubmit={handleSubmit} />
+  );
+}
+
+function AgentRegisterPill() {
+  const additionalFields = ['booking_agent_id', 'airline_name'];
+
+  const handleSubmit = (data) => {
+    console.log('Agent Register Data:', data);
+    // Implement POST request to backend here
+  };
+
+  return (
+    <RegisterForm logintype="booking_agent" additionalFields={additionalFields} onSubmit={handleSubmit} />
+  );
+}
+
+function StaffRegisterPill() {
+  const additionalFields = ['first_name', 'last_name', 'date_of_birth', 'permission', 'airline_name'];
+
+  const handleSubmit = (data) => {
+    console.log('Staff Register Data:', data);
+    // Implement POST request to backend here
+  };
+
+  return (
+    <RegisterForm logintype="airline_staff" additionalFields={additionalFields} onSubmit={handleSubmit} />
+  );
+}
+
+function RegisterTab() {
+	return (
+	<div>
+		<Typography variant="h4">Register as a...</Typography>
+		<NavPills 
+			color="rose"
+			tabs={[
+				{
+					tabButton: "Customer",
+					tabContent: (<CustomerRegisterPill />)
+				},
+				{
+					tabButton: "Booking Agent",
+					tabContent: (<AgentRegisterPill />)
+				},
+				{
+					tabButton: "Airline Staff",
+					tabContent: (<StaffRegisterPill />)
+				}
+			]}
+		/>
+	</div>
+	);
 }
 
 function LoginForm() {
@@ -59,7 +175,8 @@ function LoginForm() {
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-
+		console.log("LoginForm handleSubmit");
+		console.log(`Data: ${username}, ${password}, ${logintype}`);
 		const response = await fetch('http://localhost:5000/api/auth/login', {
 			method: 'POST',
 			headers: {
@@ -179,125 +296,112 @@ function LoginForm() {
   );
 }
 
-function LoginFormStyled() {
-	function handleSubmit() {
-		alert("submit");
-	}
-	return (
+function LoginPill({ logintype }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
+  const { updateUser } = useContext(authContext);
+
+	const handleSubmit = async (event) => {
+		console.log("LoginPill handleSubmit");
+		console.log(`Data: ${username}, ${password}, ${logintype}`);
+		event.preventDefault();
+
+		const response = await fetch('http://localhost:5000/api/auth/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				username: username,
+				password: password,
+				logintype: logintype
+			})
+		}).catch((error) => {
+			alert(error);
+			return null;
+		});
+
+		const data = await response.json()
+
+		if (data.status == "success") {
+			updateUser({
+				logintype: logintype,
+				username: username,
+				username_display: data.username_display
+			});
+		}
+		else {
+			alert(data.message);
+			return null;
+		}
+		console.log(data);
+
+		// route to index
+		router.push("/");
+	};
+
+  return (
 		<div>
-			<GridContainer justify="center">
-				<GridItem xs={12} sm={12} md={4}>
-					<Card>
-						<CardHeader color="primary">
-							<h4>Login</h4>
-							<p>Enter your username and password</p>
-						</CardHeader>
-						<CardBody>
-							<CustomInput
-								labelText="Username"
-								id="username"
-								formControlProps={{
-									fullWidth: true
-								}}
-								inputProps={{
-									type: "text",
-									endAdornment: (
-										<InputAdornment position="end">
-											<People />
-										</InputAdornment>
-									)
-								}}
-							/>
-							<CustomInput
-								labelText="Password"
-								id="password"
-								formControlProps={{
-									fullWidth: true
-								}}
-								inputProps={{
-									type: "password",
-									endAdornment: (
-										<InputAdornment position="end">
-											<Icon>
-												lock_outline
-											</Icon>
-										</InputAdornment>
-									)
-								}}
-							/>
-							<Button 
-								color="primary"
-								variant="contained"
-								onClick={handleSubmit}
-							>Submit</Button>
-						</CardBody>
-						{/* <CardFooter>
-							<Button color="primary">Login</Button>
-						</CardFooter> */}
-					</Card>
-				</GridItem>
-			</GridContainer>
-			</div>
-	);
+      <CustomInput
+        labelText="Username"
+        id="username"
+        formControlProps={{
+          fullWidth: true
+        }}
+        inputProps={{
+          type: "text",
+          onChange: (e) => setUsername(e.target.value)
+        }}
+      />
+      <CustomInput
+        labelText="Password"
+        id="password"
+        formControlProps={{
+          fullWidth: true
+        }}
+        inputProps={{
+          type: "password",
+          onChange: (e) => setPassword(e.target.value)
+        }}
+      />
+      <Button color="primary" onClick={handleSubmit}>
+			Login
+			</Button>
+		</div>
+  );
 }
 
-
 function CustomerLoginPill() {
-	return (
-		<div>Customer Login</div>
-	)
+  return <LoginPill logintype="customer" />;
 }
 
 function AgentLoginPill() {
-	return (
-		<div>Agent Login</div>
-	)
+  return <LoginPill logintype="booking_agent" />;
 }
 
 function StaffLoginPill() {
-	return (
-		<div>Staff Login</div>
-	)
-}
-
-function CustomerRegisterPill() {
-	return (
-		<div>Customer Register</div>
-	)
-}
-
-function AgentRegisterPill() {
-	return (
-		<div>Agent Register</div>
-	)
-}
-
-function StaffRegisterPill() {
-	return (
-		<div>Staff Register</div>
-	)
+  return <LoginPill logintype="airline_staff" />;
 }
 
 function LoginTab() {
 	return (
 		<div>
-		<Typography variant="h4">Log in as a...</Typography>
+			<Typography variant="h4">Login as a...</Typography>
 			<NavPills 
 				color="rose"
 				tabs={[
 					{
 						tabButton: "Customer",
-						tabIcon: FaceIcon,
 						tabContent: (<CustomerLoginPill />)
 					},
 					{
 						tabButton: "Booking Agent",
-						tabIcon: SupervisedUserCircleIcon,
 						tabContent: (<AgentLoginPill />)
 					},
 					{
 						tabButton: "Airline Staff",
-						tabIcon: BuildIcon,
 						tabContent: (<StaffLoginPill />)
 					}
 				]}
@@ -306,72 +410,47 @@ function LoginTab() {
 	)
 }
 
-function RegisterTab() {
-	return (
-		<div>
-			<Typography variant="h4">Register as a...</Typography>
-			<NavPills 
-				color="rose"
-				tabs={[
-					{
-						tabButton: "Customer",
-						tabIcon: FaceIcon,
-						tabContent: (<CustomerRegisterPill />)
-					},
-					{
-						tabButton: "Booking Agent",
-						tabIcon: SupervisedUserCircleIcon,
-						tabContent: (<AgentRegisterPill />)
-					},
-					{
-						tabButton: "Airline Staff",
-						tabIcon: BuildIcon,
-						tabContent: (<StaffRegisterPill />)
-					}
-				]}
-			/>
-		</div>
-	)
-}
 
 function LoginOrRegisterTabs() {
-	return (
-		<GridContainer justify="center">
-			<GridItem xs={12} sm={12} md={12} lg={10}>
-				<CustomTabs
-					headerColor="primary"
-					tabs={[
-						{
-							tabName: "Login",
+
+  return (
+    <GridContainer justify="center">
+      <GridItem xs={12} sm={12} md={12} lg={10}>
+        <CustomTabs
+          headerColor="primary"
+          tabs={[
+            {
+              tabName: "Login",
+              // Add LoginTab component here if exists
 							tabContent: (<LoginTab />)
-						}, 
-						{
-							tabName: "Register",
-							tabContent: (<RegisterTab />)
-						},
-					]}
-					/>
-			</GridItem>
-		</GridContainer>
-	);
+            }, 
+            {
+              tabName: "Register",
+              tabContent: (<RegisterTab />)
+            },
+          ]}
+        />
+      </GridItem>
+    </GridContainer>
+  );
 }
 
 export default function LoginPage(props) {
-	const classes = useStyles();
-	const { ...rest } = props;
+  const classes = useStyles();
+  const { ...rest } = props;
 
   return (
-		<div>
-			<ATRSHeader {...rest} />
-			<div 
-				className={classNames(classes.main)}>
-				<div className={classes.container}>
-					<div className={classes.section}>
-					 <LoginOrRegisterTabs />
-					</div>
-				</div>
-			</div>
-			<ATRSFooter />
-		</div>
-	);
+    <div>
+      <ATRSHeader {...rest} />
+      <div className={classes.main}>
+        <div className={classes.container}>
+          <div className={classes.section}>
+						{/* <LoginForm /> */}
+            <LoginOrRegisterTabs />
+          </div>
+        </div>
+      </div>
+      <ATRSFooter />
+    </div>
+  );
 }

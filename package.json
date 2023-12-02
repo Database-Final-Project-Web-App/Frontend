@@ -44,7 +44,7 @@
     "nouislider": "14.7.0",
     "prop-types": "15.8.1",
     "react": ">=16.0.0",
-    "react-datetime": "3.1.1",
+    "react-datetime": "^3.1.1",
     "react-dom": ">=16.0.0",
     "react-slick": "0.29.0",
     "sass": "1.66.1",
