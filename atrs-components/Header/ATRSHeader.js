@@ -1,6 +1,6 @@
 
 import Header from "/components/Header/Header.js";
-import ATRSHeaderLinks from "/atrs-components/Header/ATRSHeaderLInks.js";
+import { ATRSHeaderLeftLinks, ATRSHeaderRightLinks } from "/atrs-components/Header/ATRSHeaderLInks.js";
 import { Typography, Icon } from "@material-ui/core";
 
 export default function ATRSHeader(props) {
@@ -15,9 +15,11 @@ export default function ATRSHeader(props) {
 					</Typography>
 				</div> 
 			}
-			// brand = "FlyFinder"
+			leftLinks={
+				<ATRSHeaderLeftLinks />
+			}
 			rightLinks={
-				<ATRSHeaderLinks />
+				<ATRSHeaderRightLinks />
 			}
 			fixed
 			color="primary"

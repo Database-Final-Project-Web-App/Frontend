@@ -128,3 +128,25 @@ export function renderInputField(field, setFormData) {
       );
   }
 }
+
+
+export async function isLogin() {
+  const response = await fetch("http://localhost:5000/api/auth/is_login", {
+    method: "GET",
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    console.log(`isLogin response not ok: ${response.status}`)
+  }
+  console.log(response)
+  const data = await response.json();
+  console.log(`isLogin return: ${data}`)
+  if (!data) {
+    console.log("isLogin response.data is null")
+    return false;
+  }
+  if (data.status != "success") {
+    return false;
+  }
+  return true;
+}

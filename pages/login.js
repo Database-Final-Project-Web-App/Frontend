@@ -275,8 +275,8 @@ function LoginPill({ logintype }) {
 		}
 		console.log(data);
 
-		// route to index
-		router.push("/");
+		// route to user profile
+		router.push("/profile");
 	};
 
   return (

@@ -1,7 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext, useState } from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
+
+import { useRouter } from "next/router";
 
 import styles from "/styles/jss/nextjs-material-kit/pages/profilePage.js";
 import Card from "/components/Card/Card.js";
@@ -15,8 +17,8 @@ import ATRSHeader from "/atrs-components/Header/ATRSHeader.js";
 import ATRSFooter from "/atrs-components/Footer/ATRSFooter.js";
 
 import { authContext } from "/auth/Context.js";
+import { isLogin } from "/utils/utils";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
 
 const useStyles = makeStyles(styles);
 
@@ -50,16 +52,10 @@ async function fetchUserProfileDetail() {
 
 
 function UserProfile() {
-	const { user } = React.useContext(authContext);
-	const [profile, setProfile] = React.useState();
-
-	const router = useRouter();
-
-	// initialize profile
-	React.useEffect(() => {
-		setProfile({ item: [] });
-	}, []);
-
+  const router = useRouter();
+  const { user } = useContext(authContext);
+  const [profile, setProfile] = useState(null);
+	
 	const displayDetail = async () => {
 		const data = await fetchUserProfileDetail();
 		if (data) {
@@ -67,27 +63,42 @@ function UserProfile() {
 		}
 		else {
 			setProfile({ item: [] });
-			router.push('/login');
 		}
 	}
 
-	return (
-			<div className="container">
+	useEffect(() => {
+		// check if user is logged in
+		isLogin()
+		.then((data) => {
+			// debugger;
+			console.log(`isLogin: ${data}`)
+			if (!data) {
+				router.push("/login");
+			}
+			else {
+				displayDetail();
+			}
+		});
+	}
+	, []);
+
+  return (
+		<div className="container">
 			<Card>
 				<CardHeader>
-					<h1>user profile</h1>
+					<h1>{user ? user.username_display: ""}</h1>
 				</CardHeader>
 				<CardBody>
 					<p>logintype: {user ? user.logintype: ""}</p>
 					<p>username: {user ? user.username : ""}</p>
 					<p>username_display: {user ? user.username_display : ""}</p>
-					<Button
+					{/* <Button
 						color="info"
 						// onClick={() => setProfile("aaa")}
 						onClick={displayDetail}
 					>
 						detail?
-					</Button>
+					</Button> */}
 					{
 						profile && profile.item ? (
 							<div>
@@ -106,24 +117,14 @@ function UserProfile() {
 				</CardFooter>
 			</Card>
 		</div>
-		
-	)
-
+  );
 }
 
 
 export default function ProfilePage(props) {
-
-	// const router = useRouter();
-
-	// useEffect(() => {
-	// 	if (!Cookies.get("username")) {
-	// 		// alert("please login first");
-	// 		router.push("/login");
-	// 	}
-	// }, []);
-
+  const router = useRouter();
   const classes = useStyles();
+
   const { ...rest } = props;
 
   return (

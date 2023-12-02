@@ -26,6 +26,30 @@ const styles = headerLinksStyle;
 
 const useStyles = makeStyles(styles);
 
+export function ATRSHeaderLeftLinks() {
+  const classes = useStyles();
+  const { user } = React.useContext(authContext);
+
+  return (
+    <List className={classes.list}>
+      <ListItem className={classes.listItem}>
+        <Link href="/search">
+          <a className={classes.navLink}>
+            Search
+          </a>
+        </Link>
+      </ListItem>
+      <ListItem className={classes.listItem}>
+        <Link href="/about">
+          <a className={classes.navLink}>
+            About
+          </a>
+        </Link>
+      </ListItem>
+    </List>
+  );
+}
+
 
 function LogoutButton() {
 
@@ -62,7 +86,7 @@ function LogoutButton() {
   )
 }
 
-export default function ATRSHeaderLinks() {
+export function ATRSHeaderRightLinks() {
 	const classes = useStyles();
 	const { user } = React.useContext(authContext);
 
