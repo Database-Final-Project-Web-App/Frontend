@@ -135,20 +135,27 @@ export const ATRSFlightCheck = () => {
 };
 
 export const ATRSFlightSearch = () => {
-const [searchParams, setSearchParams] = useState({});
+  const [searchParams, setSearchParams] = useState({});
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fieldsConfig = [
-    { name: 'flight_num', label: 'Flight Number', type: 'number' },
     { name: 'airline_name', label: 'Airline Name' },
-    // Add more fields here as per your search_handler
+    { name: 'arrival_time', label: 'Arrival Time', type: 'datetime' },
+    { name: 'departure_time', label: 'Departure Time', type: 'datetime' },
+    { name: 'price', label: 'Price', type: 'number' },
+    { name: 'status', label: 'Status' },
+    { name: 'arr_airport_name', label: 'Arrival Airport' },
+    { name: 'dept_airport_name', label: 'Departure Airport' },
+    { name: 'arr_city', label: 'Arrival City' },
+    { name: 'dept_city', label: 'Departure City' },
+    // Add more fields as required
   ];
 
   const convertToFieldType = (name, value) => {
     const field = fieldsConfig.find(f => f.name === name);
     if (field && field.type === 'number') {
-			return value != '' ? Number(value) : null;
+      return value !== '' ? Number(value) : null;
     }
     return value; // Default case, return the value as-is
   };
@@ -191,7 +198,7 @@ const [searchParams, setSearchParams] = useState({});
 
   };
 
-	return (
+  return (
     <Container>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
