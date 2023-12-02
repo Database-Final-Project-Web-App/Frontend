@@ -6,7 +6,7 @@
 
 import React from "react";
 import Cookies from 'js-cookie';
-import Router from "next/router";
+import { useRouter } from "next/router";
 
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -32,6 +32,8 @@ function LogoutButton() {
   const classes = useStyles();
   const { user, updateUser } = React.useContext(authContext);
 
+  const router = useRouter();
+
   async function handleLogout() {
     // clear the copy of user info on client side
     //    otherwise, it could be invalid after logout
@@ -45,9 +47,8 @@ function LogoutButton() {
 
     updateUser(null);
 
-    Router.push("/");
+    router.push('/');
   }
-
   return (
     <Button
       href="#pablo"

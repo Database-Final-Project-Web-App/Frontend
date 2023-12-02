@@ -49,10 +49,12 @@ async function fetchUserProfileDetail() {
 }
 
 
-
 function UserProfile() {
 	const { user } = React.useContext(authContext);
 	const [profile, setProfile] = React.useState();
+
+	const router = useRouter();
+
 	// initialize profile
 	React.useEffect(() => {
 		setProfile({ item: [] });
@@ -65,6 +67,7 @@ function UserProfile() {
 		}
 		else {
 			setProfile({ item: [] });
+			router.push('/login');
 		}
 	}
 
@@ -111,25 +114,14 @@ function UserProfile() {
 
 export default function ProfilePage(props) {
 
-  // When this page is load, 
-  
-  // // use useEffect to check if user is logged in
-  // componentDidMount = () => {
-  //   if (!Cookies.get("username")) {
-  //     // alert("please login first");
-  //     Router.push("/login");
-  //   }
-  // };
+	// const router = useRouter();
 
-	const router = useRouter();
-
-	useEffect(() => {
-		if (!Cookies.get("username")) {
-			// alert("please login first");
-			router.push("/login");
-		}
-	}, []);
-
+	// useEffect(() => {
+	// 	if (!Cookies.get("username")) {
+	// 		// alert("please login first");
+	// 		router.push("/login");
+	// 	}
+	// }, []);
 
   const classes = useStyles();
   const { ...rest } = props;
