@@ -16,14 +16,14 @@ import CustomTabs from '/components/CustomTabs/CustomTabs.js';
 import ATRSHeader from '../atrs-components/Header/ATRSHeader';
 import ATRSFooter from '../atrs-components/Footer/ATRSFooter';
 import styles from '/styles/jss/nextjs-material-kit/pages/components.js';
-import { renderInputField } from '/utils/utils.js';
+import { renderInputField, validateFields } from '/utils/utils.js';
+import { Flag } from '@material-ui/icons';
 
 styles.section = {
 	padding: '140px 0 70px 0',
 }
 
 const useStyles = makeStyles(styles);
-
 
 function RegisterForm({ logintype, fieldsConfig, onSubmit }) {
   const [formData, setFormData] = useState(fieldsConfig.reduce((acc, field) => {
@@ -39,33 +39,91 @@ function RegisterForm({ logintype, fieldsConfig, onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {fieldsConfig.map(field => renderInputField(field))}
+      {fieldsConfig.map(field => renderInputField(field, setFormData))}
       <Button color="primary" type="submit">Register</Button>
     </form>
   );
 }
 
+async function handleRegisterSubmit(data, fieldsConfig, logintype) {
+	// 1. validate data (if required but not filled, alert user)
+	// 2. POST with json data to backend at localhost:5000/api/auth/register
+	// 3. on return, 
+	// 		1. if success, alert user and redirect to login page
+	// 		2. if fail, alert user and redirect to register page
+	// check if required fields are empty
+
+	// 1. validate data, and alert user the first error
+	const { flag, message } = validateFields(fieldsConfig, data);
+	if (!flag) {
+		alert(message);
+		return null;
+	}
+
+	// 2. POST with json data to backend at localhost:5000/api/auth/register
+	const response = await fetch('http://localhost:5000/api/auth/register', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		credentials: 'include',
+		body: JSON.stringify({
+			username: data.username,
+			password: data.password,
+			logintype: logintype,
+			name: data.name,
+			building_number: data.building_number,
+			street: data.street,
+			city: data.city,
+			state: data.state,
+			phone_number: data.phone_number,
+			passport_number: data.passport_number,
+			passport_expiration: data.passport_expiration,
+			passport_country: data.passport_country,
+			date_of_birth: data.date_of_birth
+		})
+	}).catch((error) => {
+		alert(error);
+		return null;
+	});
+
+	// 3. on return,
+	// 		1. if success, alert user and redirect to login page
+	// 		2. if fail, alert user and redirect to register page
+	const responseData = await response.json()
+	if (responseData.status == "success") {
+		alert(responseData.message);
+	}
+	else {
+		alert(responseData.message);
+		return null;
+	}
+	console.log(responseData);
+
+
+
+};
 
 function CustomerRegisterPill() {
   const fieldsConfig = [
-    { name: 'username', label: 'Username' },
-    { name: 'password', label: 'Password', type: 'password' },
-    { name: 'name', label: 'Name' },
+    { name: 'username', label: 'Email', required: true },
+    { name: 'password', label: 'Password', type: 'password', required: true },
+    { name: 'name', label: 'Name', required: true },
     { name: 'building_number', label: 'Building Number' },
     { name: 'street', label: 'Street' },
     { name: 'city', label: 'City' },
     { name: 'state', label: 'State' },
-    { name: 'phone_number', label: 'Phone Number' },
-    { name: 'passport_number', label: 'Passport Number' },
-    { name: 'passport_expiration', label: 'Passport Expiration', type: 'date' },
-    { name: 'passport_country', label: 'Passport Country' },
-    { name: 'date_of_birth', label: 'Date of Birth', type: 'date' }
+    { name: 'phone_number', label: 'Phone Number', required: true },
+    { name: 'passport_number', label: 'Passport Number', required: true },
+    { name: 'passport_expiration', label: 'Passport Expiration', type: 'date', required: true },
+    { name: 'passport_country', label: 'Passport Country', required: true },
+    { name: 'date_of_birth', label: 'Date of Birth', type: 'date', required: true }
   ];
 
-  const handleSubmit = (data) => {
-    console.log('Customer Register Data:', data);
-    // Implement POST request to backend here
-  };
+	const handleSubmit = (data) => {
+		console.log('Customer Register Data before handleSubmit:', data);
+		handleRegisterSubmit(data, fieldsConfig, "customer");
+	}
 
   return (
     <RegisterForm logintype="customer" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
@@ -74,15 +132,15 @@ function CustomerRegisterPill() {
 
 function AgentRegisterPill() {
   const fieldsConfig = [
-    { name: 'username', label: 'Username' },
-    { name: 'password', label: 'Password', type: 'password' },
-    { name: 'booking_agent_id', label: 'Booking Agent ID' },
-    { name: 'airline_name', label: 'Airline Name' }
+    { name: 'username', label: 'Username', required: true },
+    { name: 'password', label: 'Password', type: 'password', required: true },
+    // { name: 'booking_agent_id', label: 'Booking Agent ID' },
+    { name: 'airline_name', label: 'Airline Name', required: true }
   ];
 
   const handleSubmit = (data) => {
     console.log('Agent Register Data:', data);
-    // Implement POST request to backend here
+    handleRegisterSubmit(data, fieldsConfig, "booking_agent");
   };
 
   return (
