@@ -2,21 +2,54 @@ import React, { useState } from 'react';
 import {
   Container, Card, CardContent, Typography, Grid, Button, TextField
 } from '@material-ui/core';
+import Datetime from 'react-datetime';
+import 'react-datetime/css/react-datetime.css';
+
+import CustomInput from '/components/CustomInput/CustomInput.js';
+
+import { validateFields } from '/utils/utils';
 
 // Utility function to render input fields
-const renderSearchField = (fieldConfig, handleInputChange) => (
-  <Grid item xs={12} sm={6} md={3} key={fieldConfig.name}>
-    <TextField
-      fullWidth
-      name={fieldConfig.name}
-      label={fieldConfig.label}
-      onChange={handleInputChange}
-      variant="outlined"
-      margin="normal"
-      type={fieldConfig.type || "text"} // Default type is text
-    />
-  </Grid>
-);
+const renderSearchField = (fieldConfig, handleInputChange) => {
+  const renderInputBasedOnType = () => {
+    switch (fieldConfig.inputType) {
+      case 'datetime':
+        return (
+          <Datetime
+            onChange={momentObj => handleInputChange({ target: { name: fieldConfig.name, value: momentObj } })}
+            inputProps={{ placeholder: fieldConfig.label }}
+          />
+        );
+      case 'slider':
+        return (
+          <Slider
+            onChange={(event, value) => handleInputChange({ target: { name: fieldConfig.name, value } })}
+            aria-labelledby="input-slider"
+          />
+        );
+      // Add cases for 'doubleSlider' and other types if needed
+      default:
+        return (
+          <TextField
+            fullWidth
+            name={fieldConfig.name}
+            label={fieldConfig.label}
+            onChange={handleInputChange}
+            variant="outlined"
+            margin="normal"
+            type={fieldConfig.type || 'text'}
+            required={fieldConfig.required || false}
+          />
+        );
+    }
+  };
+
+  return (
+    <Grid item xs={12} sm={6} md={3} key={fieldConfig.name}>
+      {renderInputBasedOnType()}
+    </Grid>
+  );
+};
 
 // FlightCard component
 const FlightSummaryCard = ({ flight }) => (
@@ -57,8 +90,8 @@ export const ATRSFlightCheck = () => {
   const [loading, setLoading] = useState(false);
 
   const fieldsConfig = [
-    { name: 'flight_num', label: 'Flight Number', type: 'number' },
-    { name: 'airline_name', label: 'Airline Name' },
+    { name: 'flight_num', label: 'Flight Number', type: 'number', required: true },
+    { name: 'airline_name', label: 'Airline Name', required: true },
     // Add more fields here as per your search_handler
   ];
 
@@ -82,6 +115,14 @@ export const ATRSFlightCheck = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+		// 1. validate fields
+		const { flag, message } = validateFields(fieldsConfig, searchParams);
+		if (!flag) {
+			alert(message);
+			return;
+		}
+
+		// 2. send post request to backend
     setLoading(true);
 
     try {
@@ -93,6 +134,7 @@ export const ATRSFlightCheck = () => {
         body: JSON.stringify(searchParams),
       });
 
+			// 3. get response and set flights
       const data = await response.json();
 
       if (response.ok) {
@@ -141,8 +183,8 @@ export const ATRSFlightSearch = () => {
 
   const fieldsConfig = [
     { name: 'airline_name', label: 'Airline Name' },
-    { name: 'arrival_time', label: 'Arrival Time', type: 'datetime' },
-    { name: 'departure_time', label: 'Departure Time', type: 'datetime' },
+    { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
+    { name: 'departure_time', label: 'Departure Time', type: 'datetime', inputType: 'datetime' },
     { name: 'price', label: 'Price', type: 'number' },
     { name: 'status', label: 'Status' },
     { name: 'arr_airport_name', label: 'Arrival Airport' },
