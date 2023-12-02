@@ -64,8 +64,30 @@ export function validateFields(fieldsConfig, data) {
   // 2. if date/time/datetime format is invalid, alert user and return false
   //    This can be simplified because date/time/datetime fields are all moment objects
   for (const field of fieldsConfig) {
-    if (!(field.type === 'date' || field.type === 'time' || field.type === 'datetime')) {
-      continue;
+    // if (!(field.type === 'date' || field.type === 'time' || field.type === 'datetime')) {
+    //   continue;
+    // }
+    switch (field.type) {
+      case 'date':
+        // use Datetime to match YYYY-MM-DD
+        if (!Datetime.moment(data[field.name], 'YYYY-MM-DD', true).isValid()) {
+          return { flag: false, message: `Invalid date format for ${field.label}` };
+        }
+        break;
+      case 'time':
+        // use Datetime to match HH:mm:ss
+        if (!Datetime.moment(data[field.name], 'HH:mm:ss', true).isValid()) {
+          return { flag: false, message: `Invalid time format for ${field.label}` };
+        }
+        break;
+      case 'datetime':
+        // use Datetime to match YYYY-MM-DD HH:mm:ss
+        if (!Datetime.moment(data[field.name], 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
+          return { flag: false, message: `Invalid datetime format for ${field.label}` };
+        }
+        break;
+      default:
+        continue;
     }
   }
   return { flag: true, message: '' };

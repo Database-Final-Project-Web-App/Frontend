@@ -25,12 +25,13 @@ styles.section = {
 
 const useStyles = makeStyles(styles);
 
-function RegisterForm({ logintype, fieldsConfig, onSubmit }) {
+function RegisterPill({ logintype, fieldsConfig, onSubmit }) {
   const [formData, setFormData] = useState(fieldsConfig.reduce((acc, field) => {
     acc[field.name] = '';
     return acc;
   }, {}));
   const classes = useStyles();
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -45,12 +46,13 @@ function RegisterForm({ logintype, fieldsConfig, onSubmit }) {
   );
 }
 
-async function handleRegisterSubmit(data, fieldsConfig, logintype) {
+async function handleRegisterSubmit(data, fieldsConfig, logintype, router) {
+
 	// 1. validate data (if required but not filled, alert user)
 	// 2. POST with json data to backend at localhost:5000/api/auth/register
 	// 3. on return, 
-	// 		1. if success, alert user and redirect to login page
-	// 		2. if fail, alert user and redirect to register page
+	// 		1. if success, alert user and redirect to index page
+	// 		2. if fail, alert user
 	// check if required fields are empty
 
 	// 1. validate data, and alert user the first error
@@ -61,50 +63,79 @@ async function handleRegisterSubmit(data, fieldsConfig, logintype) {
 	}
 
 	// 2. POST with json data to backend at localhost:5000/api/auth/register
+	let register_data = {
+			username: data.username,
+			password: data.password,
+			logintype: logintype,
+	}
+	switch (logintype) {
+		case "customer":
+			register_data = {
+				...register_data,
+				name: data.name,
+				building_number: data.building_number,
+				street: data.street,
+				city: data.city,
+				state: data.state,
+				phone_number: data.phone_number,
+				passport_number: data.passport_number,
+				passport_expiration: data.passport_expiration,
+				passport_country: data.passport_country,
+				date_of_birth: data.date_of_birth
+			};
+			break;
+		case "booking_agent":
+			register_data = {
+				...register_data,
+				airline_name: data.airline_name
+			};
+			break;
+		case "airline_staff":
+			register_data = {
+				...register_data,
+				first_name: data.first_name,
+				last_name: data.last_name,
+				date_of_birth: data.date_of_birth,
+				airline_name: data.airline_name
+			};
+			break;
+		default: 
+			alert("Invalid logintype");
+			return null;
+	}	
+	console.log(register_data);
 	const response = await fetch('http://localhost:5000/api/auth/register', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		credentials: 'include',
-		body: JSON.stringify({
-			username: data.username,
-			password: data.password,
-			logintype: logintype,
-			name: data.name,
-			building_number: data.building_number,
-			street: data.street,
-			city: data.city,
-			state: data.state,
-			phone_number: data.phone_number,
-			passport_number: data.passport_number,
-			passport_expiration: data.passport_expiration,
-			passport_country: data.passport_country,
-			date_of_birth: data.date_of_birth
-		})
+		body: JSON.stringify( register_data )
 	}).catch((error) => {
 		alert(error);
 		return null;
 	});
 
+
+	// debugger;
 	// 3. on return,
-	// 		1. if success, alert user and redirect to login page
-	// 		2. if fail, alert user and redirect to register page
+	// 		1. if success, alert user and redirect to index page
+	// 		2. if fail, alert user
+	if (!response) {
+		return null;
+	}
 	const responseData = await response.json()
 	if (responseData.status == "success") {
 		alert(responseData.message);
+		router.push("/");
 	}
 	else {
 		alert(responseData.message);
-		return null;
 	}
-	console.log(responseData);
-
-
-
 };
 
 function CustomerRegisterPill() {
+
   const fieldsConfig = [
     { name: 'username', label: 'Email', required: true },
     { name: 'password', label: 'Password', type: 'password', required: true },
@@ -120,13 +151,15 @@ function CustomerRegisterPill() {
     { name: 'date_of_birth', label: 'Date of Birth', type: 'date', required: true }
   ];
 
+	const router = useRouter();
+
 	const handleSubmit = (data) => {
 		console.log('Customer Register Data before handleSubmit:', data);
-		handleRegisterSubmit(data, fieldsConfig, "customer");
+		handleRegisterSubmit(data, fieldsConfig, "customer", router);
 	}
 
   return (
-    <RegisterForm logintype="customer" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
+    <RegisterPill logintype="customer" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
   );
 }
 
@@ -138,13 +171,15 @@ function AgentRegisterPill() {
     { name: 'airline_name', label: 'Airline Name', required: true }
   ];
 
+	const router = useRouter();
+
   const handleSubmit = (data) => {
     console.log('Agent Register Data:', data);
-    handleRegisterSubmit(data, fieldsConfig, "booking_agent");
+    handleRegisterSubmit(data, fieldsConfig, "booking_agent", router);
   };
 
   return (
-    <RegisterForm logintype="booking agent" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
+    <RegisterPill logintype="booking agent" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
   );
 }
 
@@ -155,17 +190,19 @@ function StaffRegisterPill() {
     { name: 'first_name', label: 'First Name' },
     { name: 'last_name', label: 'Last Name' },
     { name: 'date_of_birth', label: 'Date of Birth', type: 'date' },
-    { name: 'permission', label: 'Permission' },
     { name: 'airline_name', label: 'Airline Name' }
   ];
 
+	const router = useRouter();
+
   const handleSubmit = (data) => {
     console.log('Staff Register Data:', data);
+		handleRegisterSubmit(data, fieldsConfig, "airline_staff", router);
     // Implement POST request to backend here
   };
 
   return (
-    <RegisterForm logintype="staff" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
+    <RegisterPill logintype="staff" fieldsConfig={fieldsConfig} onSubmit={handleSubmit} />
   );
 }
 
@@ -195,139 +232,6 @@ function RegisterTab() {
 	);
 }
 
-function LoginForm() {
-
-	const classes = useStyles();
-
-	const [username, setUsername] = React.useState('');
-	const [password, setPassword] = React.useState('');
-	const [logintype, setLogintype] = React.useState('');
-
-	const { user, updateUser } = React.useContext(authContext);
-	const router = useRouter();
-
-	const handleSubmit = async (event) => {
-		event.preventDefault();
-		console.log("LoginForm handleSubmit");
-		console.log(`Data: ${username}, ${password}, ${logintype}`);
-		const response = await fetch('http://localhost:5000/api/auth/login', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			credentials: 'include',
-			body: JSON.stringify({
-				username: username,
-				password: password,
-				logintype: logintype
-			})
-		}).catch((error) => {
-			alert(error);
-			return null;
-		});
-
-		const data = await response.json()
-
-		if (data.status == "success") {
-			updateUser({
-				logintype: logintype,
-				username: username,
-				username_display: data.username_display
-			});
-		}
-		else {
-			alert(data.message);
-		}
-		console.log(data);
-
-		// route to index
-		router.push("/");
-	};
-
-	return (
-		<div>
-		<div className="container">
-			<GridContainer justify="center">
-				<GridItem xs={12} sm={12} md={12}>
-				<form className={classes.form} onSubmit={handleSubmit}>
-					<input
-						type="text"
-						name="username"
-						placeholder="username"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-					/>
-					{/* <CustomInput
-					id="username"
-					labelText="username"
-					formControlProps={{
-						fullWidth: true
-					}}
-					onChange={(e) => {
-						setUsername(e.target.value);
-						console.log("username: ", e.target.value);
-					}}
-					/> */}
-
-					<input
-						type="password"
-						name="password"
-						placeholder="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-					/>
-					{/* <CustomInput
-						id="password"
-						labelText="password"
-						inputProps={{
-							type: "password",
-						}}
-						formControlProps={{
-							fullWidth: true
-						}}
-						onChange={(e) => {
-							setPassword(e.target.value);
-							console.log("password: ", e.target.value);
-						}}
-					/> */}
-				<input
-					type="text"
-					name="logintype"
-					placeholder="logintype"
-					value={logintype}
-					onChange={(e) => setLogintype(e.target.value)}
-				/>
-				<input type="submit" value="Submit" />
-					{/* <CustomInput
-						id="logintype"
-						labelText="logintype"
-						formControlProps={{
-							fullWidth: true
-						}}
-						onChange={(e) => {
-							console.log("logintype: ", e.target.value);
-							setLogintype(e.target.value);
-							console.log("logintype: ", e.target.value);
-						}}
-					/>
-					<Box textAlign="center"> 
-						<Button
-							color="primary"
-							type="submit"
-							variant="contained"
-						>
-							Submit
-						</Button>
-						</Box> */}
-					</form>
-				</GridItem>	
-			</GridContainer>
-		</div>
-
-
-		</div>
-  );
-}
 
 function LoginPill({ logintype }) {
   const [username, setUsername] = useState('');
