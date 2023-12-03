@@ -34,7 +34,10 @@ export default function Search(props) {
 						<div className={classes.vpad} />
 						<Typography variant="h3" align="left">Search Flights</Typography>
 						<div className={classes.vpad} />
-						<ATRSFlightSearch />
+						<ATRSFlightSearch
+							submitTo='http://localhost:5000/api/public/flight/search'
+							customFieldsConfig={[]}
+						/>
 
           </div>
         </div>

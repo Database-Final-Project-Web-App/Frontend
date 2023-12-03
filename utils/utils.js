@@ -155,3 +155,28 @@ export async function isLogin() {
   }
   return true;
 }
+
+
+// onclick button, fetch and display user profile detail
+export async function fetchUserProfileDetail() {
+	// sent GET request at localhost:5000/api/customer/whoami
+	// to get user profile. Fetch should timeout after 1 second
+	const response = await fetch('http://localhost:5000/api/public/whoami', {
+		method: 'GET',
+		credentials: 'include',
+	})
+	.catch((error) => {
+		alert(error);
+		return null;
+	});
+
+	const jresponse = await response.json()
+	if (!response.ok) {
+		alert(`response not ok: ${jresponse.message}`);
+		return null;
+	}
+	
+	const data = jresponse.data;
+	console.log(data);
+	return data
+}

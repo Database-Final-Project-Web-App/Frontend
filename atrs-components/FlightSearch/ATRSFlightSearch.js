@@ -11,6 +11,9 @@ import { validateFields } from '/utils/utils';
 
 // Utility function to render input fields
 const renderSearchField = (fieldConfig, handleInputChange) => {
+  if (fieldConfig.norender) {
+    return null;
+  }
   const renderInputBasedOnType = () => {
     switch (fieldConfig.inputType) {
       case 'date':
@@ -22,8 +25,16 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
           <Datetime
             onChange={momentObj => handleInputChange({ target: { name: fieldConfig.name, value: momentObj } })}
             inputProps={{ placeholder: fieldConfig.label }}
-            dateFormat={fieldConfig.type === 'date' || fieldConfig.inputType === 'datetime'}
-            timeFormat={fieldConfig.type === 'time' || fieldConfig.inputType === 'datetime'}
+            dateFormat={
+              fieldConfig.type === 'date' || fieldConfig.inputType === 'datetime'
+              ? 'YYYY-MM-DD'
+              : false
+            }
+            timeFormat={
+              fieldConfig.type === 'time' || fieldConfig.inputType === 'datetime'
+              ? 'HH:mm:ss'
+              : false
+            }
             key={fieldConfig.name}
             defaultValue={fieldConfig.defaultValue || ''}
           />
@@ -160,6 +171,7 @@ export const ATRSFlightCheck = () => {
     try {
       const response = await fetch('http://localhost:5000/api/public/flight/search', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -214,7 +226,7 @@ export const ATRSFlightCheck = () => {
 
 };
 
-export const ATRSFlightSearch = () => {
+export function ATRSFlightSearch(props) {
   const [searchParams, setSearchParams] = useState({});
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -230,9 +242,13 @@ export const ATRSFlightSearch = () => {
     { name: 'dept_city', label: 'Departure City' },
     { name: 'arr_airport_name', label: 'Arrival Airport' },
     { name: 'arr_city', label: 'Arrival City' },
-    { name: 'price', label: 'Price', type: 'number' },
+    { name: 'price', label: 'Price', type: 'number', norender: true},
     // Add more fields as required
   ];
+
+  if (props.customFieldsConfig) {
+    fieldsConfig.push(...props.customFieldsConfig);
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -276,8 +292,9 @@ export const ATRSFlightSearch = () => {
     console.log("2. send post request to backend");
     try {
 			console.log(searchParams)
-      const response = await fetch('http://localhost:5000/api/public/flight/search', {
+      const response = await fetch(props.submitTo ? props.submitTo : 'http://localhost:5000/api/public/flight/search', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
