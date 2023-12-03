@@ -15,6 +15,7 @@ import { List, ListItem, Typography } from "@material-ui/core";
 import Link from "next/link";
 
 import Button from "/components/CustomButtons/Button.js";
+import CustomDropdown from "/components/CustomDropdown/CustomDropdown.js";
 
 import { authContext } from "/auth/Context";
 
@@ -83,18 +84,59 @@ function LogoutButton() {
   )
 }
 
+function StaffDropdown() {
+
+  const classes = useStyles();
+  const { user } = React.useContext(authContext);
+  if (!user || !user.username_display) {
+    return (<div>error!</div>)
+  };
+
+  return (
+    <CustomDropdown
+      navDropdown
+      buttonText={ user.username_display }
+      buttonProps={{
+        className: classes.navLink,
+        color: "transparent"
+      }}
+      dropdownList={[
+        <Link href="/airline_staff/profile">
+          <a className={classes.dropdownLink}>Profile</a>
+        </Link>,
+        <Link href="/airline_staff/manage">
+          <a className={classes.dropdownLink}>Manage</a>
+        </Link>,
+      ]}
+    />
+  );
+}
+
 export function ATRSHeaderRightLinks() {
 	const classes = useStyles();
 	const { user } = React.useContext(authContext);
 
 	return (
 		<List className={classes.list}>
+      {/* <Link href={user && user.username ? `/${user.logintype}/profile` : "/login"}>
+        <a className={classes.navLink}>
+          {user && user.username ? user.username_display : "Login/Register"}
+        </a>
+      </Link> */}
       <ListItem className={classes.listItem}>
-        <Link href={user && user.username ? `/${user.logintype}/profile` : "/login"}>
-          <a className={classes.navLink}>
-            {user && user.username ? user.username_display : "Login/Register"}
-          </a>
-        </Link>
+        {user && user.logintype ? (
+          user.logintype === 'airline_staff' ? (
+            <StaffDropdown />
+          ) : (
+            <Link href={`/${user.logintype}/profile`}>
+              <a className={classes.navLink}>{user.username_display}</a>
+            </Link>
+          )
+        ) : (
+          <Link href="/login">
+            <a className={classes.navLink}>Login/Register</a>
+          </Link>
+        )}
       </ListItem>
       { user && user.username
         ?

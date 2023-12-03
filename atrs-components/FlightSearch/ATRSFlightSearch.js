@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Container, Card, CardContent, Typography, Grid, Button, TextField, InputLabel, Divider
 } from '@material-ui/core';
@@ -12,6 +12,7 @@ import CustomInput from '/components/CustomInput/CustomInput.js';
 
 import { validateFields } from '/utils/utils';
 
+import { authContext } from '/auth/Context.js';
 
 // Utility function to render input fields
 const renderSearchField = (fieldConfig, handleInputChange) => {
@@ -93,12 +94,19 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
 };
 
 // FlightAccordion component
-
-const FlightAccordionCard = ({ flight }) => {
+export const FlightAccordionCard = ({ flight }) => {
   const router = useRouter();
+  const { user } = useContext(authContext);
 
   const handleButtonClick = () => {
     // Redirect to a parametrized URL to buy ticket
+    if (!user || !user.logintype) {
+        router.push("/login");
+    }
+    else if (user.logintype !== "customer" && user.logintype !== "booking_agent") {
+        alert("Only customer and booking agent can purchase ticket");
+        return null;
+    }
     router.push(`/purchase?flight_num=${flight.flight_num}&airline_name=${flight.airline_name}`);
   };
 
@@ -148,52 +156,6 @@ const FlightAccordionCard = ({ flight }) => {
     </Grid>
   );
 };
-
-export default FlightAccordionCard;
-
-
-
-// // FlightCard component
-// const FlightSummaryCard = ({ flight }) => (
-//   <Grid item xs={12} sm={12} md={12}>
-//     <Card>
-//       <CardContent>
-//         <Typography variant="h5">{flight.airline_name}{", Flight #"}{flight.flight_num}{
-//           flight.ticket_id ? (", Ticket #"+flight.ticket_id) : ""
-//         }</Typography>
-//         {/* Add other flight details here */}
-//         <Typography variant="body2">{flight.dept_airport_name}{" -> "}{flight.arr_airport_name}</Typography>
-//         <Typography variant="body2">{flight.departure_time}{" -> "}{flight.arrival_time}</Typography>
-//         <Typography variant="body2">Status: {flight.status}</Typography>
-//         <Divider omponent="li" variant='middle' />
-//         {/* use map to show full details of a flight */}
-// 				{Object.entries(flight).map(([key, value]) => (
-// 					<Typography variant="body2" key={key}>
-// 						{key}: {value}
-// 					</Typography>
-// 				))}
-//       </CardContent>
-//     </Card>
-//   </Grid>
-// );
-
-// const FlightFullCard = ({ flight }) => (
-// 	<Grid item xs={12} sm={12} md={12}>
-// 		<Card>
-// 			<CardContent>
-//         <Typography variant="h5">{flight.airline_name}{", Flight #"}{flight.flight_num}{
-//           flight.ticket_id ? (", Ticket #"+flight.ticket_id) : ""
-//         }</Typography>
-// 				{/* use map to show full details of a flight */}
-// 				{Object.entries(flight).map(([key, value]) => (
-// 					<Typography variant="body2" key={key}>
-// 						{key}: {value}
-// 					</Typography>
-// 				))}
-// 			</CardContent>
-// 		</Card>
-// 	</Grid>
-// );
 
 const convertToFieldType = (name, value, fieldsConfig) => {
 	const field = fieldsConfig.find(f => f.name === name);
@@ -470,3 +432,4 @@ export function ATRSFlightSearch(props) {
     </Container>
   );
 };
+

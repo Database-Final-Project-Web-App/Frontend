@@ -2,6 +2,7 @@
 /*
   This page is for airline staff to view their profile.
   - View My Info
+  - View My Flights
   - view all booking agents
   - view frequent customers
   - view reports
@@ -26,6 +27,18 @@ import ATRSHeader from "/atrs-components/Header/ATRSHeader.js";
 import ATRSFooter from "/atrs-components/Footer/ATRSFooter.js";
 import { authContext } from "/auth/Context.js";
 import { isLogin, fetchUserProfileDetail } from "/utils/utils";
+
+// pills
+import { 
+  InfoPill, 
+  FlightsPill, 
+  AgentsPill,
+  FreqCustomersPill,
+  ReportsPill,
+  SalesPill,
+  TopDestinationsPill,
+} from "/pills/airline_staff/profile/profile.js";
+
 import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
 
 const useStyles = makeStyles(styles);
@@ -34,74 +47,6 @@ styles.sections = {
   padding: "100px 0 0 0",
 	minHeight: "100vh",
 };
-
-function InfoPill({ info }) {
-	const router = useRouter();
-  const { user } = useContext(authContext);
-  const [profile, setProfile] = useState(null);
-	
-	const displayDetail = async () => {
-		const data = await fetchUserProfileDetail();
-		if (data) {
-			setProfile({ item: data });
-		}
-		else {
-			setProfile({ item: [] });
-		}
-	}
-
-	useEffect(() => {
-		// check if user is logged in
-		isLogin()
-		.then((data) => {
-			// debugger;
-			console.log(`isLogin: ${data}`)
-			if (!data) {
-				router.push("/login");
-			}
-			else {
-				displayDetail();
-			}
-		});
-	}
-	, []);
-
-  return (
-		<div className="container">
-			<Card>
-				<CardHeader>
-					<h1>{user ? user.username_display: ""}</h1>
-				</CardHeader>
-				<CardBody>
-					<p>logintype: {user ? user.logintype: ""}</p>
-					<p>username: {user ? user.username : ""}</p>
-					{
-						profile && profile.item ? (
-							<div>
-								{Object.keys(profile.item).map((key, index) => (
-									<p key={index}>{key}: {profile.item[key]}</p>
-								))}
-							</div>
-						) : (
-							<div>
-							</div>
-						)
-					}
-				</CardBody>
-				<CardFooter>
-				</CardFooter>
-			</Card>
-		</div>
-  );
-}
-
-function FlightsPill() {
-  // FlightsPill content here
-}
-
-function ClientsPill() {
-  // ClientsPill content here
-}
 
 
 function UserProfile() {
@@ -122,9 +67,7 @@ function UserProfile() {
     isLogin().then((data) => {
       if (!data) {
         router.push("/login");
-      } else {
-        displayDetail();
-      }
+      } 
     });
   }, []);
 
@@ -136,16 +79,32 @@ function UserProfile() {
           tabs={[
             {
               tabButton: "View My Info",
-              tabContent: <InfoPill info={profile} />
+              tabContent: <InfoPill />
             },
             {
               tabButton: "View Flights",
               tabContent: <FlightsPill />
             },
             {
-              tabButton: "View Clients",
-              tabContent: <ClientsPill />
+              tabButton: "View Booking Agents",
+              tabContent: <AgentsPill />
             },
+            {
+              tabButton: "View Frequent Customers",
+              tabContent: <FreqCustomersPill />
+            },
+            {
+              tabButton: "View Reports",
+              tabContent: <ReportsPill />
+            },
+            {
+              tabButton: "View Sales",
+              tabContent: <SalesPill />
+            },
+            {
+              tabButton: "View Top Destinations",
+              tabContent: <TopDestinationsPill />
+            }
           ]}
           horizontal={{
             tabsGrid: { xs: 2, sm: 2, md: 3 },

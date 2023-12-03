@@ -6,100 +6,140 @@
 		This is only needed for booking agent to specify customer_email
 */
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
+import { makeStyles } from "@material-ui/core/styles";
+
 import { useRouter } from 'next/router'
 import { authContext } from "/auth/Context.js";
 import { isLogin } from '../utils/utils';
-import { InputLabel, Input } from '@material-ui/core';
+import { Container, Typography, TextField, Button, InputLabel, FormControl, Input } from '@material-ui/core';
+
+import ATRSHeader from "/atrs-components/Header/ATRSHeader.js";
+import ATRSFooter from "/atrs-components/Footer/ATRSFooter.js";
+
+import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
 
 
+const useStyles = makeStyles(styles);
 
-export default function Purchase() {
-	const router = useRouter();
-	const { user } = React.useContext(authContext);
-	// if (!user) {
-	// 	alert("Please login first");
-	// 	router.push("/login");
-	// }
-	// if (user.logintype !== "customer" && user.logintype !== "booking_agent") {
-	// 	alert("Only customer and booking_agent can purchase ticket");
-	// 	router.push("/");
-	// }
+styles.sections = {
+  padding: "100px 0 0 0",
+	minHeight: "100vh",
+};
 
-	const { flight_num, airline_name } = router.query;
-	const { customer_email, setCustomerEmail } = React.useState('');
 
-	const handleSubmit = async (e) => {
-		// debugger;
-		e.preventDefault();
-		// assemble data
-		if ( parseInt(flight_num) === NaN || !airline_name ) {
-			alert("flight_num or airline_name is invalid");
-			return;
-		}
+function PurchaseForm() {
+    const router = useRouter();
+    const { user } = useContext(authContext);
+    const { flight_num, airline_name } = router.query;
+    const [customer_email, setCustomerEmail] = useState('');
 
-		const data = {
-			flight_num: parseInt(flight_num),
-			airline_name: airline_name,
-			customer_email: user.logintype === "booking_agent" ? customer_email : null,
-		}
-		
-		// send POST request with json object and cookie to localhost:5000/api/{logintype}/purchase
-		try {
-			const url = {
-				"customer": "http://localhost:5000/api/customer/ticket/purchase",
-				"booking_agent": "http://localhost:5000/api/booking-agent/ticket/purchase",
-			}[user.logintype]
-			const response = await fetch(url, {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			if (!response.ok) {
-				// get response json data, and display error message
-				const jresponse = await response.json();
-				alert(jresponse.error);
-				return;
-			}
-			const jresponse = await response.json();
-			alert("Purchase success");
-			router.push("/");
-		}
-		catch (e) {
-			alert(e);
-			return;
-		}
-	};
-
-	const handleCustomerEmailChange = (e) => {
-		setCustomerEmail(e.target.value);
-	}
-
-	return (
-		<div>
-			<h1>Purchase</h1>
-			<p>flight_num: {flight_num}</p>
-			<p>airline_name: {airline_name}</p>
-			<form onSubmit={handleSubmit}>
-				{
-					user.logintype === "booking_agent"
-					?
-					<div>
-						<InputLabel>Customer Email</InputLabel>
-						<Input
-							type="text"
-							value={customer_email}
-							onChange={handleCustomerEmailChange}
-						/>
-					</div>
-					:
-					null
+		useEffect(() => {
+				if (!user || !user.logintype) {
+						alert("You must login as either customer or booking agent to purchase ticket")
+						router.push("/login");
 				}
-				<input type="submit" value="Submit" />
-			</form>
-		</div>
-	)
+				else if (user.logintype !== "customer" && user.logintype !== "booking_agent") {
+						alert("Only customer and booking agent can purchase ticket");
+						router.back();
+				}
+		}, [user]);
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (isNaN(parseInt(flight_num)) || !airline_name) {
+            alert("flight_num or airline_name is invalid");
+            return;
+        }
+
+        const data = {
+            flight_num: parseInt(flight_num),
+            airline_name: airline_name,
+            customer_email: user.logintype === "booking_agent" ? customer_email : null,
+        };
+
+				// send POST request with json object and cookie to localhost:5000/api/{logintype}/purchase
+				try {
+					const url = {
+						"customer": "http://localhost:5000/api/customer/ticket/purchase",
+						"booking_agent": "http://localhost:5000/api/booking-agent/ticket/purchase",
+					}[user.logintype]
+					const response = await fetch(url, {
+						method: 'POST',
+						credentials: 'include',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(data),
+					});
+					if (!response.ok) {
+						// get response json data, and display error message
+						const jresponse = await response.json();
+						alert(jresponse.error);
+						return;
+					}
+					const jresponse = await response.json();
+					alert("Purchase success");
+					router.push("/");
+				}
+				catch (e) {
+					alert(e);
+					return;
+				}
+			};
+
+    return (
+        <Container>
+            <Typography variant="h4">Purchase</Typography>
+            <Typography>Flight Number: {flight_num}</Typography>
+            <Typography>Airline Name: {airline_name}</Typography>
+            <form onSubmit={handleSubmit}>
+                {
+								user.logintype === "booking_agent" && (
+										<FormControl fullWidth margin="normal">
+												<InputLabel htmlFor="customer-email">Customer Email</InputLabel>
+												<TextField
+														id="customer-email"
+														type="email"
+														value={customer_email}
+														onChange={(e) => setCustomerEmail(e.target.value)}
+														fullWidth
+												/>
+										</FormControl>
+								)
+                }
+                <Button type="submit" color="primary" variant="contained">
+                    Submit
+                </Button>
+            </form>
+        </Container>
+    );
+}
+
+export default function Purchase(props) {
+		const router = useRouter();
+		const { user } = useContext(authContext);
+
+		const classes = useStyles(styles);
+		const { ...rest } = props
+
+		useEffect(() => {
+				if (!user || !user.logintype) {
+						router.push("/login");
+				}
+		}, [user]);
+
+		return (
+    <div className={classes.main}>
+      <ATRSHeader {...rest} />
+      <div className={classes.sections}>
+        <div className={classes.container}>
+					<PurchaseForm />
+        </div>
+      </div>
+      <ATRSFooter />
+    </div>
+		);
 }

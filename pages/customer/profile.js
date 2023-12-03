@@ -76,7 +76,7 @@ function InfoPill({ info }) {
   );
 }
 
-function FlightPill() {
+function FlightsPill() {
 	// add customField to search by date range
 	return (
 		<ATRSFlightSearch
@@ -249,7 +249,7 @@ function UserProfile() {
             {
               tabButton: "View My Flight",
               tabContent: (
-								<FlightPill />
+								<FlightsPill />
               ),
             },
             {
