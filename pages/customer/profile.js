@@ -168,7 +168,7 @@ function SpendingPill() {
 				<GridItem xs={12} sm={12} md={4}>
 					<InputLabel>Start Date</InputLabel>
 					<Datetime
-						inputProps={{ placeholder: "Start Date" }}
+						inputProps={{ placeholder: "Start Date", readOnly: true }}
 						timeFormat={false}
 						onChange={handleStartDateChange}
 						initialValue={default_start_date}
@@ -179,7 +179,7 @@ function SpendingPill() {
 				<GridItem xs={12} sm={12} md={4}>
 					<InputLabel>End Date</InputLabel>
 					<Datetime
-						inputProps={{ placeholder: "End Date" }}
+						inputProps={{ placeholder: "End Date", readOnly: true }}
 						timeFormat={false}
 						onChange={handleEndDateChange}
 						initialValue={default_end_date}

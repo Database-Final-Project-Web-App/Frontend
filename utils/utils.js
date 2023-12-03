@@ -111,7 +111,7 @@ export function renderInputField(field, setFormData) {
 						{field.required ? `${field.label} (Required)` : field.label}
 					</InputLabel>
           <Datetime
-            inputProps={{ placeholder: field.label }}
+            inputProps={{ placeholder: field.label, readOnly: true }}
             onChange={handleFieldChange(setFormData, field.name, field.type)}
             dateFormat={field.type === 'date' || field.type === 'datetime'}
             timeFormat={field.type === 'time' || field.type === 'datetime'}

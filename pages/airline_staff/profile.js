@@ -1,3 +1,15 @@
+
+/*
+  This page is for airline staff to view their profile.
+  - View My Info
+  - view all booking agents
+  - view frequent customers
+  - view reports
+    total amount of ticket sold within a time range, and a monthly bar chart
+  - view pie chart for revenue earned from direct sale (customer) and indirect sale (agent)
+  - view top destination
+*/
+
 import React, { useEffect, useContext, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { useRouter } from "next/router";

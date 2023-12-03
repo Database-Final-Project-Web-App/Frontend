@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import CustomInput from '/components/CustomInput/CustomInput.js';
 
 import { validateFields } from '/utils/utils';
-import { Flight } from '@material-ui/icons';
+
 
 // Utility function to render input fields
 const renderSearchField = (fieldConfig, handleInputChange) => {
@@ -28,7 +28,7 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
 					<Typography variant="caption">{fieldConfig.label}</Typography>
           <Datetime
             onChange={momentObj => handleInputChange({ target: { name: fieldConfig.name, value: momentObj } })}
-            inputProps={{ placeholder: fieldConfig.label }}
+            inputProps={{ placeholder: fieldConfig.label, readOnly: true }}
             dateFormat={
               fieldConfig.type === 'date' || fieldConfig.inputType === 'datetime'
               ? 'YYYY-MM-DD'
@@ -43,6 +43,28 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
             defaultValue={fieldConfig.defaultValue || ''}
           />
 					</div>
+        );
+      case 'slider':
+        return (
+          <div>
+          <Typography variant="caption">{fieldConfig.label}</Typography>
+          <CustomInput
+            labelText={fieldConfig.label}
+            id={fieldConfig.name}
+            formControlProps={{
+              fullWidth: true
+            }}
+            inputProps={{
+              type: 'range',
+              min: fieldConfig.min || 0,
+              max: fieldConfig.max || 100,
+              step: fieldConfig.step || 1,
+              defaultValue: fieldConfig.defaultValue || 0,
+              name: fieldConfig.name,
+              onChange: handleInputChange
+            }}
+          />
+          </div>
         );
       // Add cases for 'doubleSlider' and other types if needed
       default:
@@ -76,8 +98,8 @@ const FlightAccordionCard = ({ flight }) => {
   const router = useRouter();
 
   const handleButtonClick = () => {
-    // Redirect to a parametrized URL, e.g., /flight/{flightNum}
-    router.push(`/flight/${flight.flight_num}`);
+    // Redirect to a parametrized URL to buy ticket
+    router.push(`/purchase?flight_num=${flight.flight_num}&airline_name=${flight.airline_name}`);
   };
 
   return (
@@ -114,12 +136,11 @@ const FlightAccordionCard = ({ flight }) => {
               </Grid>
             ))}
             <Grid item xs={12}>
-              <Button 
-                color="primary" 
-                onClick={handleButtonClick}
-              >
-                View Details
-              </Button>
+              {
+                typeof flight.ticket_id === 'undefined' || flight.ticket_id === null
+                ? <Button color='primary' onClick={handleButtonClick}>Buy Ticket</Button>
+                : null
+              }
             </Grid>
           </Grid>
         </AccordionDetails>
@@ -186,6 +207,8 @@ const convertToFieldType = (name, value, fieldsConfig) => {
 	switch (field.type) {
 		case 'number':
 			return value !== '' ? Number(value) : defaultValue;
+    case 'integer':
+      return value !== '' ? parseInt(value) : defaultValue;
 		case 'date':
 			return value.format ? value.format('YYYY-MM-DD') : defaultValue;
 		case 'time':
@@ -294,7 +317,12 @@ export const ATRSFlightCheck = () => {
       {/* Flight cards rendering */}
       <Grid container spacing={2}>
         {flights.map(flight => (
-          <FlightFullCard key={flight.flight_num} flight={flight} />
+          // <FlightFullCard key={flight.flight_num} flight={flight} />
+          <FlightAccordionCard key={
+            flight.ticket_id
+            ? flight.ticket_id
+            : `${flight.airline_name}-${flight.flight_num}`
+          } flight={flight} />
         ))}
       </Grid>
     </Container>
