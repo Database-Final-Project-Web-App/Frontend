@@ -53,6 +53,8 @@ function handleFieldChange(setFormData, fieldName, fieldType) {
   };
 }
 
+
+
 export function validateFields(fieldsConfig, data) {
   
   // 1. if required but not filled in, alert user and return false

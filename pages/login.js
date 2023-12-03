@@ -276,7 +276,8 @@ function LoginPill({ logintype }) {
 		console.log(data);
 
 		// route to user profile
-		router.push("/profile");
+		router.push(`/${logintype}/profile`);
+		// router.replace("/");
 	};
 
   return (

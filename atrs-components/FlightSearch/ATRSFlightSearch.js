@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container, Card, CardContent, Typography, Grid, Button, TextField, InputLabel
 } from '@material-ui/core';
@@ -24,6 +24,8 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
             inputProps={{ placeholder: fieldConfig.label }}
             dateFormat={fieldConfig.type === 'date' || fieldConfig.inputType === 'datetime'}
             timeFormat={fieldConfig.type === 'time' || fieldConfig.inputType === 'datetime'}
+            key={fieldConfig.name}
+            defaultValue={fieldConfig.defaultValue || ''}
           />
 					</div>
         );
@@ -38,7 +40,9 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
             variant="outlined"
             margin="normal"
             type={fieldConfig.type || 'text'}
+            key={fieldConfig.name}
             required={fieldConfig.required || false}
+            defaultValue={fieldConfig.defaultValue || ''}
           />
         );
     }
@@ -56,11 +60,11 @@ const FlightSummaryCard = ({ flight }) => (
   <Grid item xs={12} sm={12} md={12}>
     <Card>
       <CardContent>
-        <Typography variant="h5">{flight.airline_name}</Typography>
+        <Typography variant="h5">{flight.airline_name}{" #"}{flight.flight_num}</Typography>
         {/* Add other flight details here */}
-        <Typography variant="body2">Flight Number: {flight.flight_num}</Typography>
-        <Typography variant="body2">Departure City: {flight.dept_city}</Typography>
-        <Typography variant="body2">Arrival City: {flight.arr_city}</Typography>
+        <Typography variant="body2">{flight.dept_airport_name}{" -> "}{flight.arr_airport_name}</Typography>
+        <Typography variant="body2">{flight.departure_time}{" -> "}{flight.arrival_time}</Typography>
+        <Typography variant="body2">Status: {flight.status}</Typography>
         {/* Add more details as needed */}
       </CardContent>
     </Card>
@@ -85,21 +89,22 @@ const FlightFullCard = ({ flight }) => (
 
 const convertToFieldType = (name, value, fieldsConfig) => {
 	const field = fieldsConfig.find(f => f.name === name);
+  const defaultValue = field.defaultValue ? field.defaultValue : null;
 	if (value === '') {
-		return null;
+		return defaultValue;
 	}
 	if (!field) {
 		return value;
 	}
 	switch (field.type) {
 		case 'number':
-			return value !== '' ? Number(value) : null;
+			return value !== '' ? Number(value) : defaultValue;
 		case 'date':
-			return value.format ? value.format('YYYY-MM-DD') : null;
+			return value.format ? value.format('YYYY-MM-DD') : defaultValue;
 		case 'time':
-			return value.format ? value.format('HH:mm:ss') : null;
+			return value.format ? value.format('HH:mm:ss') : defaultValue;
 		case 'datetime':
-			return value.format ? value.format('YYYY-MM-DD HH:mm:ss') : null;
+			return value.format ? value.format('YYYY-MM-DD HH:mm:ss') : defaultValue;
 		default:
 			return value;		// Default case, return the value as-is		
 	}
@@ -127,6 +132,16 @@ export const ATRSFlightCheck = () => {
     });
   };
 
+  // set searchParams to default values
+  useEffect(() => {
+    const defaultSearchParams = {};
+    for (const field of fieldsConfig) {
+      defaultSearchParams[field.name] = field.defaultValue ? field.defaultValue : null;
+    }
+    setSearchParams(defaultSearchParams);
+  }, []);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 		// 1. validate fields
@@ -151,8 +166,14 @@ export const ATRSFlightCheck = () => {
         body: JSON.stringify(searchParams),
       });
 
-			// 3. get response and set flights
+			// 3. get response, data postprecess, and set flights
       const data = await response.json();
+      // reformat departure_time and arrival_time to ignore seconds
+      data.flights = data.flights.map(flight => {
+        flight.departure_time = flight.departure_time.slice(0, -7) + ' GMT';
+        flight.arrival_time = flight.arrival_time.slice(0, -7) + ' GMT';
+        return flight;
+      });
 
       if (response.ok) {
         setFlights(data.flights);
@@ -204,7 +225,7 @@ export const ATRSFlightSearch = () => {
     { name: 'departure_date', label: 'Departure Date', type: 'date', inputType: 'date' },
     { name: 'arrival_date', label: 'Arrival Date', type: 'date', inputType: 'date' },
     { name: 'airline_name', label: 'Airline Name' },
-    { name: 'status', label: 'Status' },
+    { name: 'status', label: 'Status', defaultValue: 'UpComing' },
     { name: 'dept_airport_name', label: 'Departure Airport' },
     { name: 'dept_city', label: 'Departure City' },
     { name: 'arr_airport_name', label: 'Arrival Airport' },
@@ -222,8 +243,7 @@ export const ATRSFlightSearch = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submitData = async (searchParams) => {
     setLoading(true);
 
 		// 1. validate fields
@@ -235,23 +255,25 @@ export const ATRSFlightSearch = () => {
 			return;
 		}
 
-    // 1.5 DIY part of searchParams
-    // add a field departure_time to searchParams. This should spans the entire departure_date
-    console.log("1.5 DIY part of searchParams")
-    if (searchParams.departure_date) {
-      // need to explicilty convert to moment object b/c departure_date is just a string
-      const startOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).startOf('day');
-      const endOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).endOf('day');
-      searchParams.departure_time = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
-    }
-    if (searchParams.arrival_date) {
-      const startOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).startOf('day');
-      const endOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).endOf('day');
-      searchParams.arrival_time = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
-    }
+    // // 1.5 DIY part of searchParams
+    // // add a field departure_time to searchParams. This should spans the entire departure_date
+    // console.log("1.5 DIY part of searchParams")
+    // if (searchParams.departure_date) {
+    //   // need to explicilty convert to moment object b/c departure_date is just a string
+    //   const startOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).startOf('day');
+    //   const endOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).endOf('day');
+    //   searchParams.departure_date = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
+    // }
+    // if (searchParams.arrival_date) {
+    //   const startOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).startOf('day');
+    //   const endOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).endOf('day');
+    //   searchParams.arrival_date = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
+    // }
+
     console.log(`searchParams: ${JSON.stringify(searchParams)}`)
 
     // 2. send post request to backend
+    console.log("2. send post request to backend");
     try {
 			console.log(searchParams)
       const response = await fetch('http://localhost:5000/api/public/flight/search', {
@@ -274,8 +296,24 @@ export const ATRSFlightSearch = () => {
     } finally {
       setLoading(false);
     }
+  }
 
+  // const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    submitData(searchParams);
   };
+
+  // set searchParams to default values and fetch default flights
+  useEffect(() => {
+    const defaultSearchParams = {};
+    for (const field of fieldsConfig) {
+      defaultSearchParams[field.name] = field.defaultValue ? field.defaultValue : null;
+    }
+    setSearchParams(defaultSearchParams);
+    // in useeffect, state searchParams is not updated yet, so we need to pass in defaultSearchParams
+    submitData(defaultSearchParams);
+  }, []);
 
   return (
     <Container>
@@ -295,7 +333,7 @@ export const ATRSFlightSearch = () => {
       {/* Flight cards rendering */}
       <Grid container spacing={2}>
         {flights.map(flight => (
-          <FlightSummaryCard key={flight.flight_num} flight={flight} />
+          <FlightSummaryCard key={`${flight.airline_name}-${flight.flight_num}`} flight={flight} />
         ))}
       </Grid>
     </Container>

@@ -5,6 +5,7 @@ import classNames from "classnames";
 import Link from "next/link";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
+import { List, Typography } from "@material-ui/core";
 // @material-ui/icons
 
 // core components
@@ -22,6 +23,15 @@ import ATRSFooter from "/atrs-components/Footer/ATRSFooter";
 
 import SectionTest from "/atrs-sections/TestSections/SectionTest";
 
+
+styles.section = {
+  padding: "140px 0 70px 0",
+}
+
+styles.vpad = {
+  padding: "40px 0 0 0",
+}
+
 const useStyles = makeStyles(styles);
 
 export default function Index(props) {
@@ -32,7 +42,15 @@ export default function Index(props) {
       <ATRSHeader {...rest} />
      
       <div className={classNames(classes.main)}>
-        {/* <SectionTest /> */}
+        <div className={classes.container}>
+          <div className={classes.section}>
+            <Typography variant="h3" align="left">Welcome to Airline Ticket Reservation System</Typography>
+            <div className={classes.vpad} />
+            <Link href='/search'>
+              <Typography variant="h5" align="left"><u>Click here to go to flight search page</u></Typography>
+            </Link>
+          </div>
+        </div> 
       </div>
       <ATRSFooter />
     </div>

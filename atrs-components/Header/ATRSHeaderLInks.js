@@ -39,13 +39,6 @@ export function ATRSHeaderLeftLinks() {
           </a>
         </Link>
       </ListItem>
-      <ListItem className={classes.listItem}>
-        <Link href="/about">
-          <a className={classes.navLink}>
-            About
-          </a>
-        </Link>
-      </ListItem>
     </List>
   );
 }
@@ -55,6 +48,7 @@ function LogoutButton() {
 
   const classes = useStyles();
   const { user, updateUser } = React.useContext(authContext);
+  const [ routed, setRouted ] = React.useState(false);
 
   const router = useRouter();
 
@@ -71,7 +65,10 @@ function LogoutButton() {
 
     updateUser(null);
 
-    router.push('/');
+    if (!routed) {
+      router.push('/');
+      setRouted(true);
+    }
   }
   return (
     <Button
@@ -93,7 +90,7 @@ export function ATRSHeaderRightLinks() {
 	return (
 		<List className={classes.list}>
       <ListItem className={classes.listItem}>
-        <Link href={user && user.username ? "/profile" : "/login"}>
+        <Link href={user && user.username ? `/${user.logintype}/profile` : "/login"}>
           <a className={classes.navLink}>
             {user && user.username ? user.username_display : "Login/Register"}
           </a>
