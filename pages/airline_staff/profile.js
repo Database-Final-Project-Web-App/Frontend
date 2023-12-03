@@ -1,35 +1,30 @@
 import React, { useEffect, useContext, useState } from "react";
-// @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-// @material-ui/icons
-
 import { useRouter } from "next/router";
-
-import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
+import NavPills from "/components/NavPills/NavPills.js";
+import GridContainer from "/components/Grid/GridContainer.js";
+import GridItem from "/components/Grid/GridItem.js";
 import Card from "/components/Card/Card.js";
-import CardHeader from '/components/Card/CardHeader.js'
+import CardHeader from '/components/Card/CardHeader.js';
 import CardBody from "/components/Card/CardBody.js";
 import CardFooter from "/components/Card/CardFooter.js";
 import Button from "/components/CustomButtons/Button.js";
-import Footer from "/components/Footer/Footer.js";
 
 import ATRSHeader from "/atrs-components/Header/ATRSHeader.js";
 import ATRSFooter from "/atrs-components/Footer/ATRSFooter.js";
-
 import { authContext } from "/auth/Context.js";
 import { isLogin, fetchUserProfileDetail } from "/utils/utils";
-import Cookies from "js-cookie";
+import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
 
 const useStyles = makeStyles(styles);
 
 styles.sections = {
-  padding: "100 0 0 0",
+  padding: "100px 0 0 0",
 	minHeight: "100vh",
-}
+};
 
-
-function UserProfile() {
-  const router = useRouter();
+function InfoPill({ info }) {
+	const router = useRouter();
   const { user } = useContext(authContext);
   const [profile, setProfile] = useState(null);
 	
@@ -68,14 +63,6 @@ function UserProfile() {
 				<CardBody>
 					<p>logintype: {user ? user.logintype: ""}</p>
 					<p>username: {user ? user.username : ""}</p>
-					<p>username_display: {user ? user.username_display : ""}</p>
-					{/* <Button
-						color="info"
-						// onClick={() => setProfile("aaa")}
-						onClick={displayDetail}
-					>
-						detail?
-					</Button> */}
 					{
 						profile && profile.item ? (
 							<div>
@@ -96,16 +83,75 @@ function UserProfile() {
   );
 }
 
+function FlightsPill() {
+  // FlightsPill content here
+}
+
+function ClientsPill() {
+  // ClientsPill content here
+}
+
+
+function UserProfile() {
+  const router = useRouter();
+  const { user } = useContext(authContext);
+  const [profile, setProfile] = useState(null);
+
+  const displayDetail = async () => {
+    const data = await fetchUserProfileDetail();
+    if (data) {
+      setProfile({ item: data });
+    } else {
+      setProfile({ item: [] });
+    }
+  }
+
+  useEffect(() => {
+    isLogin().then((data) => {
+      if (!data) {
+        router.push("/login");
+      } else {
+        displayDetail();
+      }
+    });
+  }, []);
+
+  return (
+    <GridContainer>
+      <GridItem xs={12} sm={12} md={12}>
+        <NavPills
+          color="rose"
+          tabs={[
+            {
+              tabButton: "View My Info",
+              tabContent: <InfoPill info={profile} />
+            },
+            {
+              tabButton: "View Flights",
+              tabContent: <FlightsPill />
+            },
+            {
+              tabButton: "View Clients",
+              tabContent: <ClientsPill />
+            },
+          ]}
+          horizontal={{
+            tabsGrid: { xs: 2, sm: 2, md: 3 },
+            contentGrid: { xs: 12, sm: 8, md: 9 }
+          }}
+        />
+      </GridItem>
+    </GridContainer>
+  );
+}
 
 export default function ProfilePage(props) {
-  const router = useRouter();
   const classes = useStyles();
-
   const { ...rest } = props;
 
   return (
     <div className={classes.main}>
-			<ATRSHeader {...rest} />
+      <ATRSHeader {...rest} />
       <div className={classes.sections}>
         <div className={classes.container}>
           <UserProfile />

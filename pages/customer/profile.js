@@ -56,7 +56,6 @@ function InfoPill({ info }) {
 				<CardBody>
 					<p>logintype: {user ? user.logintype: ""}</p>
 					<p>username: {user ? user.username : ""}</p>
-					<p>username_display: {user ? user.username_display : ""}</p>
 					{
 						info && info.item ? (
 							<div>

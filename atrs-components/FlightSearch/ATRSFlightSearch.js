@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Container, Card, CardContent, Typography, Grid, Button, TextField, InputLabel
+  Container, Card, CardContent, Typography, Grid, Button, TextField, InputLabel, Divider
 } from '@material-ui/core';
+import { Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { useRouter } from 'next/router';
 import CustomInput from '/components/CustomInput/CustomInput.js';
 
 import { validateFields } from '/utils/utils';
+import { Flight } from '@material-ui/icons';
 
 // Utility function to render input fields
 const renderSearchField = (fieldConfig, handleInputChange) => {
@@ -66,46 +70,118 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
   );
 };
 
-// FlightCard component
-const FlightSummaryCard = ({ flight }) => (
-  <Grid item xs={12} sm={12} md={12}>
-    <Card>
-      <CardContent>
-        <Typography variant="h5">{flight.airline_name}{" #"}{flight.flight_num}</Typography>
-        {/* Add other flight details here */}
-        <Typography variant="body2">{flight.dept_airport_name}{" -> "}{flight.arr_airport_name}</Typography>
-        <Typography variant="body2">{flight.departure_time}{" -> "}{flight.arrival_time}</Typography>
-        <Typography variant="body2">Status: {flight.status}</Typography>
-        {/* Add more details as needed */}
-      </CardContent>
-    </Card>
-  </Grid>
-);
+// FlightAccordion component
 
-const FlightFullCard = ({ flight }) => (
-	<Grid item xs={12} sm={12} md={12}>
-		<Card>
-			<CardContent>
-				<Typography variant="h5">{flight.airline_name}</Typography>
-				{/* use map to show full details of a flight */}
-				{Object.entries(flight).map(([key, value]) => (
-					<Typography variant="body2" key={key}>
-						{key}: {value}
-					</Typography>
-				))}
-			</CardContent>
-		</Card>
-	</Grid>
-);
+const FlightAccordionCard = ({ flight }) => {
+  const router = useRouter();
+
+  const handleButtonClick = () => {
+    // Redirect to a parametrized URL, e.g., /flight/{flightNum}
+    router.push(`/flight/${flight.flight_num}`);
+  };
+
+  return (
+    <Grid item xs={12} sm={12} md={12}>
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography variant="h6">
+            {flight.airline_name}, Flight #{flight.flight_num}
+            {flight.ticket_id ? `, Ticket #${flight.ticket_id}` : ""}
+          </Typography>
+          <Grid item xs={12}>
+              <Typography variant="body2">
+                {flight.dept_airport_name} -> {flight.arr_airport_name}
+              </Typography>
+              <Typography variant="body2">
+                {flight.departure_time} -> {flight.arrival_time}
+              </Typography>
+              <Typography variant="body2">
+                Status: {flight.status}
+              </Typography>
+            </Grid>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container>
+            {Object.entries(flight).map(([key, value]) => (
+              <Grid item xs={12} key={key}>
+                <Typography variant="body2">
+                  {key}: {value}
+                </Typography>
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              <Button 
+                color="primary" 
+                onClick={handleButtonClick}
+              >
+                View Details
+              </Button>
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+    </Grid>
+  );
+};
+
+export default FlightAccordionCard;
+
+
+
+// // FlightCard component
+// const FlightSummaryCard = ({ flight }) => (
+//   <Grid item xs={12} sm={12} md={12}>
+//     <Card>
+//       <CardContent>
+//         <Typography variant="h5">{flight.airline_name}{", Flight #"}{flight.flight_num}{
+//           flight.ticket_id ? (", Ticket #"+flight.ticket_id) : ""
+//         }</Typography>
+//         {/* Add other flight details here */}
+//         <Typography variant="body2">{flight.dept_airport_name}{" -> "}{flight.arr_airport_name}</Typography>
+//         <Typography variant="body2">{flight.departure_time}{" -> "}{flight.arrival_time}</Typography>
+//         <Typography variant="body2">Status: {flight.status}</Typography>
+//         <Divider omponent="li" variant='middle' />
+//         {/* use map to show full details of a flight */}
+// 				{Object.entries(flight).map(([key, value]) => (
+// 					<Typography variant="body2" key={key}>
+// 						{key}: {value}
+// 					</Typography>
+// 				))}
+//       </CardContent>
+//     </Card>
+//   </Grid>
+// );
+
+// const FlightFullCard = ({ flight }) => (
+// 	<Grid item xs={12} sm={12} md={12}>
+// 		<Card>
+// 			<CardContent>
+//         <Typography variant="h5">{flight.airline_name}{", Flight #"}{flight.flight_num}{
+//           flight.ticket_id ? (", Ticket #"+flight.ticket_id) : ""
+//         }</Typography>
+// 				{/* use map to show full details of a flight */}
+// 				{Object.entries(flight).map(([key, value]) => (
+// 					<Typography variant="body2" key={key}>
+// 						{key}: {value}
+// 					</Typography>
+// 				))}
+// 			</CardContent>
+// 		</Card>
+// 	</Grid>
+// );
 
 const convertToFieldType = (name, value, fieldsConfig) => {
 	const field = fieldsConfig.find(f => f.name === name);
   const defaultValue = field.defaultValue ? field.defaultValue : null;
 	if (value === '') {
-		return defaultValue;
+		return null;
 	}
 	if (!field) {
-		return value;
+		return null;
 	}
 	switch (field.type) {
 		case 'number':
@@ -286,7 +362,7 @@ export function ATRSFlightSearch(props) {
     //   searchParams.arrival_date = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
     // }
 
-    console.log(`searchParams: ${JSON.stringify(searchParams)}`)
+		console.log(searchParams)
 
     // 2. send post request to backend
     console.log("2. send post request to backend");
@@ -350,7 +426,17 @@ export function ATRSFlightSearch(props) {
       {/* Flight cards rendering */}
       <Grid container spacing={2}>
         {flights.map(flight => (
-          <FlightSummaryCard key={`${flight.airline_name}-${flight.flight_num}`} flight={flight} />
+          // keyed by ticket_id
+          // <FlightSummaryCard key={
+          //   flight.ticket_id
+          //   ? flight.ticket_id
+          //   : `${flight.airline_name}-${flight.flight_num}`
+          // } flight={flight} />
+          <FlightAccordionCard key={
+            flight.ticket_id
+            ? flight.ticket_id
+            : `${flight.airline_name}-${flight.flight_num}`
+          } flight={flight} />
         ))}
       </Grid>
     </Container>
