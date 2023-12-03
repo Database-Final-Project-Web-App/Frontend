@@ -9,6 +9,8 @@ import 'react-datetime/css/react-datetime.css';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useRouter } from 'next/router';
 import CustomInput from '/components/CustomInput/CustomInput.js';
+import GridContainer from '/components/Grid/GridContainer.js';
+import GridItem from '/components/Grid/GridItem.js';
 
 import { validateFields } from '/utils/utils';
 
@@ -300,8 +302,6 @@ export function ATRSFlightSearch(props) {
   const fieldsConfig = [
     // { name: 'departure_time', label: 'Departure Time', type: 'datetime', inputType: 'datetime' },
     // { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
-    { name: 'departure_date', label: 'Departure Date', type: 'date', inputType: 'date' },
-    { name: 'arrival_date', label: 'Arrival Date', type: 'date', inputType: 'date' },
     { name: 'airline_name', label: 'Airline Name' },
     { name: 'status', label: 'Status', defaultValue: 'UpComing' },
     { name: 'dept_airport_name', label: 'Departure Airport' },
@@ -313,7 +313,8 @@ export function ATRSFlightSearch(props) {
   ];
 
   if (props.customFieldsConfig) {
-    fieldsConfig.push(...props.customFieldsConfig);
+    // prepend custom fields to fieldsConfig
+    fieldsConfig.unshift(...props.customFieldsConfig);
   }
 
   const handleInputChange = (e) => {
@@ -336,21 +337,6 @@ export function ATRSFlightSearch(props) {
 			alert(message);
 			return;
 		}
-
-    // // 1.5 DIY part of searchParams
-    // // add a field departure_time to searchParams. This should spans the entire departure_date
-    // console.log("1.5 DIY part of searchParams")
-    // if (searchParams.departure_date) {
-    //   // need to explicilty convert to moment object b/c departure_date is just a string
-    //   const startOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).startOf('day');
-    //   const endOfDay = Datetime.moment(searchParams.departure_date, 'YYYY-MM-DD', true).endOf('day');
-    //   searchParams.departure_date = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
-    // }
-    // if (searchParams.arrival_date) {
-    //   const startOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).startOf('day');
-    //   const endOfDay = Datetime.moment(searchParams.arrival_date, 'YYYY-MM-DD', true).endOf('day');
-    //   searchParams.arrival_date = [startOfDay.format('YYYY-MM-DD HH:mm:ss'), endOfDay.format('YYYY-MM-DD HH:mm:ss')];
-    // }
 
 		console.log(searchParams)
 
@@ -407,7 +393,7 @@ export function ATRSFlightSearch(props) {
           )}
           <Grid item xs={12}>
             <Button type="submit" color="primary" variant="contained">
-              Search Flights
+              Search { props.searchFor === "tickets" ?  "Tickets" : "Flights" }
             </Button>
           </Grid>
         </Grid>
@@ -416,19 +402,142 @@ export function ATRSFlightSearch(props) {
       {/* Flight cards rendering */}
       <Grid container spacing={2}>
         {flights.map(flight => (
-          // keyed by ticket_id
-          // <FlightSummaryCard key={
-          //   flight.ticket_id
-          //   ? flight.ticket_id
-          //   : `${flight.airline_name}-${flight.flight_num}`
-          // } flight={flight} />
           <FlightAccordionCard key={
-            flight.ticket_id
+            props.searchFor === "tickets"
             ? flight.ticket_id
             : `${flight.airline_name}-${flight.flight_num}`
           } flight={flight} />
         ))}
       </Grid>
+    </Container>
+  );
+};
+
+
+export function ATRSCustomersOfFlight(props) {
+  const [searchParams, setSearchParams] = useState({});
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fieldsConfig = [
+    // { name: 'departure_time', label: 'Departure Time', type: 'datetime', inputType: 'datetime' },
+    // { name: 'arrival_time', label: 'Arrival Time', type: 'datetime', inputType: 'datetime' },
+    { name: 'flight_num', label: 'Flight Number', type: 'number', required: true },
+    // { name: 'airline_name', label: 'Airline Name', required: true},
+  ];
+
+  if (props.customFieldsConfig) {
+    // prepend custom fields to fieldsConfig
+    fieldsConfig.unshift(...props.customFieldsConfig);
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    const updatedValue = convertToFieldType(name, value, fieldsConfig);
+    setSearchParams({
+      ...searchParams,
+      [name]: updatedValue
+    });
+  };
+
+  const submitData = async (searchParams) => {
+    setLoading(true);
+
+		// 1. validate fields
+		console.log(`searchParams: ${JSON.stringify(searchParams)}`);
+		console.log("1. validate fields");
+		const { flag, message } = validateFields(fieldsConfig, searchParams);
+		if (!flag) {
+			alert(message);
+			return;
+		}
+
+		console.log(searchParams)
+
+    // 2. send post request to backend
+    console.log("2. send post request to backend");
+    try {
+			console.log(searchParams)
+      const response = await fetch(props.submitTo ? props.submitTo : 
+        `http://localhost:5000/api/airline-staff/flight/customers-of-flight?flight_num=${searchParams.flight_num}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      // 3. get response, data postprecess, and set customers
+      const data = await response.json();
+
+      if (response.ok) {
+        // debugger;
+        setCustomers(data.customers)
+      } else {
+        alert(`Error: ${data.message ? data.message : data.error}`);
+      }
+    } catch (error) {
+      alert('Error fetching flights: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    submitData(searchParams);
+  };
+
+  // // set searchParams to default values and fetch default flights
+  // useEffect(() => {
+  //   const defaultSearchParams = {};
+  //   for (const field of fieldsConfig) {
+  //     defaultSearchParams[field.name] = field.defaultValue ? field.defaultValue : null;
+  //   }
+  //   setSearchParams(defaultSearchParams);
+  //   // in useeffect, state searchParams is not updated yet, so we need to pass in defaultSearchParams
+  //   submitData(defaultSearchParams);
+  // }, []);
+
+  return (
+    <Container>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+          {fieldsConfig.map(field => 
+            renderSearchField(field, handleInputChange)
+          )}
+          <Grid item xs={12}>
+            <Button type="submit" color="primary" variant="contained">
+              Search Customers
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+
+      {/* Flight cards rendering */}
+      <GridContainer xs={12}>
+        <GridItem>
+        {/* {
+          customers ? (customers.map(customer => (
+            <p>Customer: {customer.customer_email}</p>
+          ))) : null
+        } */}
+        {/* Map result to a List in MUI  */}
+            {
+              customers ? (customers.map(customer => (
+                <div>
+                <Card>
+                  <CardContent>
+                    <Typography variant="body2" component="p">
+                      <p>Email: {customer.customer_email}</p>
+                      <p>Number of Tickets: {customer.num_of_tickets}</p>
+                    </Typography>
+                  </CardContent>
+                </Card>
+                <Divider />
+                </div>
+              ))) : null
+            }
+        </GridItem>
+      </GridContainer >
     </Container>
   );
 };

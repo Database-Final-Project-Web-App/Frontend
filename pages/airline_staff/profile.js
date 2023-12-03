@@ -32,6 +32,7 @@ import { isLogin, fetchUserProfileDetail } from "/utils/utils";
 import { 
   InfoPill, 
   FlightsPill, 
+  CustomersPill,
   AgentsPill,
   FreqCustomersPill,
   ReportsPill,
@@ -84,6 +85,10 @@ function UserProfile() {
             {
               tabButton: "View Flights",
               tabContent: <FlightsPill />
+            },
+            {
+              tabButton: "View Customers of Flights",
+              tabContent: <CustomersPill />
             },
             {
               tabButton: "View Booking Agents",

@@ -81,7 +81,11 @@ function FlightsPill() {
 	return (
 		<ATRSFlightSearch
 			submitTo='http://localhost:5000/api/customer/flight/my'
-			customFieldsConfig={[]}
+			searchFor='tickets'
+			customFieldsConfig={[
+				{ name: 'departure_time', label: 'Departure Date', type: 'date', inputType: 'date' },
+        { name: 'arrival_time', label: 'Arrival Date', type: 'date', inputType: 'date' },
+			]}
 		/>
 	)
 }

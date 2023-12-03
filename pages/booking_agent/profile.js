@@ -89,12 +89,11 @@ function FlightsPill() {
 	return (
 		<ATRSFlightSearch
 			submitTo='http://localhost:5000/api/booking-agent/flight/my'
+      searchFor='tickets'
 			customFieldsConfig={[
-				{
-					name: "customer_email",
-					type: "string",
-					label: "Customer Email",
-				},
+				{ name: "customer_email", type: "string", label: "Customer Email", },
+        { name: 'departure_time', label: 'Departure Date', type: 'date', inputType: 'date' },
+        { name: 'arrival_time', label: 'Arrival Date', type: 'date', inputType: 'date' },
 			]}
 		/>
 	)
