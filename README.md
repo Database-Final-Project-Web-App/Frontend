@@ -63,22 +63,3 @@ pills/							# modularized components that constitute the pages
 │   │   ├── profile.js: modular components for profile staff manage page
 
 ```
-
-
-
-
-
-## Webpage Spec
-
-This section documents the webpages that are implemented in the frontend, and their corresponding routes and functionalities.
-
-
-### Home Page
-
-### Login / Register Page
-
-### Customer Profile Page
-
-### Booking Agent Profile Page
-
-### Airline Staff Profile Page
