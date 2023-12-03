@@ -21,9 +21,6 @@ import styles from "/styles/jss/nextjs-material-kit/pages/components.js";
 import ATRSHeader from "/atrs-components/Header/ATRSHeader";
 import ATRSFooter from "/atrs-components/Footer/ATRSFooter";
 
-import SectionTest from "/atrs-sections/TestSections/SectionTest";
-
-
 styles.section = {
   padding: "140px 0 70px 0",
 }
