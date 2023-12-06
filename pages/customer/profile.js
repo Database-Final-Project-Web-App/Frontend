@@ -82,9 +82,17 @@ function FlightsPill() {
 		<ATRSFlightSearch
 			submitTo='http://localhost:5000/api/customer/flight/my'
 			searchFor='tickets'
+			buyTicket={false}
 			customFieldsConfig={[
-				{ name: 'departure_time', label: 'Departure Date', type: 'date', inputType: 'date' },
-        { name: 'arrival_time', label: 'Arrival Date', type: 'date', inputType: 'date' },
+				{ name: 'departure_date', label: 'Departure Date', type: 'date', inputType: 'date' },
+        { name: 'arrival_date', label: 'Arrival Date', type: 'date', inputType: 'date' },
+				{ name: 'airline_name', label: 'Airline Name' },
+				{ name: 'status', label: 'Status', defaultValue: 'UpComing' },
+				{ name: 'dept_airport_name', label: 'Departure Airport' },
+				{ name: 'dept_city', label: 'Departure City' },
+				{ name: 'arr_airport_name', label: 'Arrival Airport' },
+				{ name: 'arr_city', label: 'Arrival City' },
+				{ name: 'price', label: 'Price', type: 'number', norender: true},
 			]}
 		/>
 	)

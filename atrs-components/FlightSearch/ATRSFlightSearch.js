@@ -16,6 +16,8 @@ import { validateFields } from '/utils/utils';
 
 import { authContext } from '/auth/Context.js';
 
+
+
 // Utility function to render input fields
 const renderSearchField = (fieldConfig, handleInputChange) => {
   if (fieldConfig.norender) {
@@ -31,7 +33,8 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
 					<Typography variant="caption">{fieldConfig.label}</Typography>
           <Datetime
             onChange={momentObj => handleInputChange({ target: { name: fieldConfig.name, value: momentObj } })}
-            inputProps={{ placeholder: fieldConfig.label, readOnly: true }}
+            // inputProps={{ placeholder: fieldConfig.label, readOnly: true }}
+            inputProps={{ placeholder: fieldConfig.label, readOnly: false }}
             dateFormat={
               fieldConfig.type === 'date' || fieldConfig.inputType === 'datetime'
               ? 'YYYY-MM-DD'
@@ -96,7 +99,8 @@ const renderSearchField = (fieldConfig, handleInputChange) => {
 };
 
 // FlightAccordion component
-export const FlightAccordionCard = ({ flight }) => {
+export const FlightAccordionCard = (props) => {
+  const flight = props.flight;
   const router = useRouter();
   const { user } = useContext(authContext);
 
@@ -147,7 +151,7 @@ export const FlightAccordionCard = ({ flight }) => {
             ))}
             <Grid item xs={12}>
               {
-                typeof flight.ticket_id === 'undefined' || flight.ticket_id === null
+                props.buyTicket 
                 ? <Button color='primary' onClick={handleButtonClick}>Buy Ticket</Button>
                 : null
               }
@@ -161,7 +165,11 @@ export const FlightAccordionCard = ({ flight }) => {
 
 const convertToFieldType = (name, value, fieldsConfig) => {
 	const field = fieldsConfig.find(f => f.name === name);
-  const defaultValue = field.defaultValue ? field.defaultValue : null;
+  const defaultValue = field.defaultValue 
+  ? field.defaultValue : (
+    field.type === 'date' || field.type === 'time' || field.type === 'datetime'
+    ? "" : null
+  );
 	if (value === '') {
 		return null;
 	}
@@ -185,7 +193,7 @@ const convertToFieldType = (name, value, fieldsConfig) => {
 };
 
 // search by flight_num and airline_name to locate a specific flight
-export const ATRSFlightCheck = () => {
+export function ATRSFlightCheck(props){
   const [searchParams, setSearchParams] = useState({});
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -230,7 +238,6 @@ export const ATRSFlightCheck = () => {
 		// 2. send post request to backend
     console.log("2. send post request to backend")
     setLoading(true);
-
     try {
       const response = await fetch('http://localhost:5000/api/public/flight/search', {
         method: 'POST',
@@ -280,13 +287,22 @@ export const ATRSFlightCheck = () => {
 
       {/* Flight cards rendering */}
       <Grid container spacing={2}>
+        <Grid item xs={12}>
+            {/* number of flights found */}
+            <Typography variant="h6" align="left">
+              Number of Flights: {flights.length}
+            </Typography>
+        </Grid>
         {flights.map(flight => (
           // <FlightFullCard key={flight.flight_num} flight={flight} />
           <FlightAccordionCard key={
             flight.ticket_id
             ? flight.ticket_id
             : `${flight.airline_name}-${flight.flight_num}`
-          } flight={flight} />
+            } 
+            flight={flight} 
+            buyTicket={props.buyTicket}
+            />
         ))}
       </Grid>
     </Container>
@@ -342,6 +358,7 @@ export function ATRSFlightSearch(props) {
 
     // 2. send post request to backend
     console.log("2. send post request to backend");
+    // debugger;
     try {
 			console.log(searchParams)
       const response = await fetch(props.submitTo ? props.submitTo : 'http://localhost:5000/api/public/flight/search', {
@@ -401,12 +418,21 @@ export function ATRSFlightSearch(props) {
 
       {/* Flight cards rendering */}
       <Grid container spacing={2}>
+        <Grid item xs={12}>
+            {/* number of flights found */}
+            <Typography variant="h6" align="left">
+              Number of { props.searchFor === "tickets" ?  "Tickets" : "Flights" }: {flights.length}
+            </Typography>
+        </Grid>
         {flights.map(flight => (
           <FlightAccordionCard key={
             props.searchFor === "tickets"
             ? flight.ticket_id
             : `${flight.airline_name}-${flight.flight_num}`
-          } flight={flight} />
+            } 
+            flight={flight} 
+            buyTicket={props.buyTicket}
+            />
         ))}
       </Grid>
     </Container>
@@ -514,6 +540,12 @@ export function ATRSCustomersOfFlight(props) {
 
       {/* Flight cards rendering */}
       <GridContainer xs={12}>
+        <GridItem xs={12}>
+            {/* number of flights found */}
+            <Typography variant="h6" align="left">
+              Number of Customers: {customers.length}
+            </Typography>
+        </GridItem>
         <GridItem>
         {/* {
           customers ? (customers.map(customer => (

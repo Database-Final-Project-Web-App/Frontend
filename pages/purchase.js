@@ -14,6 +14,8 @@ import { authContext } from "/auth/Context.js";
 import { isLogin } from '../utils/utils';
 import { Container, Typography, TextField, Button, InputLabel, FormControl, Input } from '@material-ui/core';
 
+import CustomInput from "/components/CustomInput/CustomInput.js";
+
 import ATRSHeader from "/atrs-components/Header/ATRSHeader.js";
 import ATRSFooter from "/atrs-components/Footer/ATRSFooter.js";
 
@@ -43,7 +45,7 @@ function PurchaseForm() {
 						alert("Only customer and booking agent can purchase ticket");
 						router.back();
 				}
-		}, [user]);
+		}, []);
 
 
     const handleSubmit = async (e) => {
@@ -97,17 +99,19 @@ function PurchaseForm() {
             <Typography>Airline Name: {airline_name}</Typography>
             <form onSubmit={handleSubmit}>
                 {
-								user.logintype === "booking_agent" && (
-										<FormControl fullWidth margin="normal">
-												<InputLabel htmlFor="customer-email">Customer Email</InputLabel>
-												<TextField
-														id="customer-email"
-														type="email"
-														value={customer_email}
-														onChange={(e) => setCustomerEmail(e.target.value)}
-														fullWidth
-												/>
-										</FormControl>
+								// buy ticket for customer, open only to booking_agent
+								user && user.logintype === "booking_agent" && (
+									<FormControl fullWidth margin="normal">
+										<CustomInput
+											labelText="Customer Email"
+											id="customer-email"
+											fullWidth 
+											value={customer_email}
+											inputProps={{
+												onChange: (e) => setCustomerEmail(e.target.value)
+											}}
+										/>
+									</FormControl>
 								)
                 }
                 <Button type="submit" color="primary" variant="contained">

@@ -45,16 +45,19 @@ export default function Search(props) {
 						/> */}
 						<Typography variant="h3" align="left">Check Flight Info</Typography>
 						<div className={classes.vpad} />
-						<ATRSFlightCheck />
+						<ATRSFlightCheck 
+							buyTicket={true}
+						/>
 						<div className={classes.vpad} />
 						<Typography variant="h3" align="left">Search Flights</Typography>
 						<div className={classes.vpad} />
 						<ATRSFlightSearch
 							submitTo='http://localhost:5000/api/public/flight/search'
 							searchFor='flights'
+							buyTicket={true}
 							customFieldsConfig={[
-								{ name: 'departure_time', label: 'Departure Date', type: 'date', inputType: 'date' },
-    						{ name: 'arrival_time', label: 'Arrival Date', type: 'date', inputType: 'date' },
+								{ name: 'departure_date', label: 'Departure Date', type: 'date', inputType: 'date' },
+    						{ name: 'arrival_date', label: 'Arrival Date', type: 'date', inputType: 'date' },
 							]}
 						/>
 

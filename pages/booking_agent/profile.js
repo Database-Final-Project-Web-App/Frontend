@@ -92,8 +92,8 @@ function FlightsPill() {
       searchFor='tickets'
 			customFieldsConfig={[
 				{ name: "customer_email", type: "string", label: "Customer Email", },
-        { name: 'departure_time', label: 'Departure Date', type: 'date', inputType: 'date' },
-        { name: 'arrival_time', label: 'Arrival Date', type: 'date', inputType: 'date' },
+        { name: 'departure_date', label: 'Departure Date', type: 'date', inputType: 'date' },
+        { name: 'arrival_date', label: 'Arrival Date', type: 'date', inputType: 'date' },
 			]}
 		/>
 	)

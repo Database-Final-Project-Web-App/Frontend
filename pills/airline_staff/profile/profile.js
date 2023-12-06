@@ -116,6 +116,7 @@ export function FlightsPill() {
 			<ATRSFlightSearch 
 				submitTo='http://localhost:5000/api/airline-staff/flight/my'
 				searchFor='tickets'
+				buyTicket={false}
 				customFieldsConfig={[
 					{ name: 'departure_time_start', label: 'Start Date', type: 'date', inputType: 'date' ,
 						// start today, end today + 30 days
